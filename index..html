@@ -1,0 +1,1179 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Astro Drama</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Symbols+2&display=swap">
+
+<style>
+  :root {
+    --black: #0A080F;
+    --purple: #3D1F6E;
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --cream: #F5F0E8;
+    --text: #EDE8F5;
+    --muted: #9B8FC0;
+    --card-bg: #110D1C;
+    --deep: #0D0A18;
+    --border: rgba(201,168,76,0.15);
+    --border-strong: rgba(201,168,76,0.35);
+    --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --glyph: 'Noto Sans Symbols 2', 'Segoe UI Symbol', 'Apple Symbols', serif;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--text); font-family: var(--sans); overflow-x: hidden; font-size: 15px; line-height: 1.5; }
+  button { font-family: var(--sans); }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    /* A barra dos signos roda sempre, mesmo com as animações do sistema desligadas */
+    .ticker { animation: ticker 30s linear infinite !important; }
+  }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 24px 14px;
+    background: rgba(10,8,15,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+  .nav-logo { font-family: var(--serif); font-weight: 900; font-size: 20px; color: var(--gold); letter-spacing: 0.05em; text-decoration: none; }
+  .nav-links { display: flex; align-items: center; gap: 20px; }
+  .nav-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+  .nav-links a:hover { color: var(--cream); }
+  .nav-cta { padding: 9px 16px; background: var(--gold); color: var(--black); font-size: 12px; font-weight: 700; letter-spacing: 0.03em; border-radius: 8px; border: none; cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .nav-cta:hover { background: var(--gold-light); }
+  @media (max-width: 720px) { .nav-links a { display: none; } }
+
+  /* ---------- BUTTONS ---------- */
+  .btn-main { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 17px 30px; background: var(--gold); color: var(--black); font-size: 16px; font-weight: 700; letter-spacing: 0.02em; border-radius: 12px; border: none; cursor: pointer; transition: background .15s, transform .15s; text-decoration: none; }
+  .btn-main:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 15px 26px; background: rgba(61,31,110,0.35); color: var(--cream); font-size: 15px; font-weight: 600; border-radius: 12px; border: 1.5px solid rgba(155,143,192,0.35); cursor: pointer; transition: border-color .15s, background .15s; }
+  .btn-ghost:hover { border-color: var(--gold); background: rgba(61,31,110,0.55); }
+  .btn-fine { font-size: 12px; color: var(--muted); }
+
+  /* ---------- HERO ---------- */
+  .hero { position: relative; overflow: hidden; padding: calc(110px + env(safe-area-inset-top, 0px)) 24px 0; }
+  .hero-bg { position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(61,31,110,0.6) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 85% 70%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 15% 70%, rgba(61,31,110,0.25) 0%, transparent 60%); }
+  .hero-stars { position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 8%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 60% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 5%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 75% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 65%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 22% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 70%, rgba(255,255,255,0.3) 0%, transparent 100%); }
+  .hero-inner { position: relative; max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; }
+  .hero-copy { text-align: left; }
+  .hero-eyebrow { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); opacity: 0.85; margin-bottom: 18px; }
+  .hero-title { font-family: var(--serif); font-weight: 900; font-size: clamp(44px, 7.5vw, 84px); line-height: 0.98; color: var(--cream); text-wrap: balance; }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-sub { font-size: clamp(15px, 2vw, 18px); color: var(--muted); max-width: 470px; line-height: 1.6; margin: 22px 0 30px; }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+  .hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+  .cta-block { display: flex; flex-direction: column; gap: 7px; align-items: flex-start; }
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero-copy { text-align: center; }
+    .hero-sub { margin-left: auto; margin-right: auto; }
+    .hero-actions, .cta-block { align-items: center; }
+  }
+
+  /* Phone mockup */
+  .phone-wrap { display: flex; justify-content: center; }
+  .phone { width: 300px; max-width: 100%; border-radius: 42px; padding: 10px; background: linear-gradient(160deg, #2a2140, #120e1e 60%, #2a2140); box-shadow: 0 40px 80px -20px rgba(61,31,110,0.7), 0 0 0 1px rgba(201,168,76,0.18); transform: rotate(2deg); }
+  .phone-screen { position: relative; border-radius: 33px; overflow: hidden; background: linear-gradient(170deg, #1A1030 0%, #0D0A18 45%, #120A20 100%); padding: 34px 16px 18px; }
+  .phone-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 86px; height: 22px; border-radius: 14px; background: #06050a; }
+  .ph-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .ph-logo { font-family: var(--serif); font-weight: 900; font-size: 11px; color: var(--gold); letter-spacing: 0.08em; }
+  .ph-date { font-size: 9px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .ph-sign { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .ph-sign-name { font-family: var(--serif); font-size: 17px; font-weight: 700; color: var(--cream); line-height: 1.1; }
+  .ph-sign-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .ph-block { background: rgba(0,0,0,0.28); border: 1px solid rgba(201,168,76,0.12); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .ph-block-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .ph-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .ph-score { font-family: var(--serif); font-weight: 900; color: var(--gold); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .ph-score.big { font-size: 38px; line-height: 1; text-shadow: 0 0 24px rgba(201,168,76,0.4); }
+  .ph-score small { font-size: 0.45em; color: var(--muted); font-family: var(--sans); font-weight: 500; }
+  .ph-tag { display: inline-block; margin: 6px 0 5px; padding: 3px 8px; border-radius: 20px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; color: var(--gold-light); }
+  .ph-text { font-size: 11px; color: var(--text); opacity: 0.85; line-height: 1.45; }
+  .ph-stat { font-family: var(--serif); font-size: 22px; font-weight: 900; color: var(--gold); line-height: 1; margin: 4px 0 3px; }
+  .ph-lock { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 10px; background: rgba(61,31,110,0.3); border: 1px dashed rgba(155,143,192,0.35); margin-bottom: 6px; }
+  .ph-lock-txt { flex: 1; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--cream); }
+  .ph-lock-txt .blur { filter: blur(3px); color: var(--muted); user-select: none; }
+  .ph-lock-btn { font-size: 8.5px; font-weight: 700; padding: 4px 7px; border-radius: 6px; background: var(--gold); color: var(--black); white-space: nowrap; }
+
+  /* Sign icon (círculo dourado + glifo) */
+  .sicon { position: relative; flex-shrink: 0; }
+  .sicon svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .sicon .glyph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--glyph); background: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #a07820 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+
+  /* Ticker */
+  .ticker-wrap { position: relative; overflow: hidden; margin: 64px -24px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; }
+  .ticker { display: flex; white-space: nowrap; width: max-content; animation: ticker 30s linear infinite; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .ticker-item { display: inline-flex; align-items: center; gap: 10px; padding: 0 26px; font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0.05em; font-variant-numeric: tabular-nums; }
+  .ticker-item .g { font-family: var(--glyph); color: var(--gold); }
+  .ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.5; }
+
+  /* ---------- SECTIONS ---------- */
+  section { padding-block: 84px; max-width: 1060px; margin: 0 auto; }
+  .wrap { padding-inline: 24px; }
+  .section-eyebrow { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-bottom: 14px; text-align: center; }
+  .section-title { font-family: var(--serif); font-weight: 900; font-size: clamp(28px, 5vw, 46px); line-height: 1.08; color: var(--cream); text-align: center; text-wrap: balance; margin-bottom: 14px; }
+  .section-title em { font-style: italic; color: var(--gold); }
+  .section-sub { font-size: 16px; color: var(--muted); text-align: center; max-width: 540px; margin: 0 auto 48px; line-height: 1.6; text-wrap: balance; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+  .step { position: relative; padding: 26px 22px 24px; border-top: 1.5px solid var(--border-strong); }
+  .step-num { font-family: var(--serif); font-size: 44px; font-weight: 900; font-style: italic; color: var(--gold); line-height: 1; margin-bottom: 14px; }
+  .step-title { font-size: 17px; font-weight: 700; color: var(--cream); margin-bottom: 8px; }
+  .step-text { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; gap: 8px; } }
+
+  /* Debaixo de Olho / O Nosso Drama */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .duo { grid-template-columns: 1fr; } }
+  .duo-col { display: flex; flex-direction: column; gap: 14px; }
+  .duo-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .duo-name { font-family: var(--serif); font-size: 24px; font-weight: 900; color: var(--cream); }
+  .duo-limit { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; }
+  .duo-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .share-card { position: relative; overflow: hidden; border-radius: 22px; padding: 26px 24px 22px; background: linear-gradient(150deg, #22123F 0%, #110D1C 55%, #1A0F2E 100%); border: 1.5px solid rgba(201,168,76,0.3); box-shadow: 0 30px 60px -30px rgba(61,31,110,0.9); }
+  .share-card::before { content: ''; position: absolute; top: -70px; right: -70px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%); pointer-events: none; }
+  .sc-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+  .sc-who { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .sc-who-name { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--cream); line-height: 1.1; }
+  .sc-who-sign { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .sc-score { font-family: var(--serif); font-size: 54px; font-weight: 900; color: var(--gold); line-height: 1; text-shadow: 0 0 30px rgba(201,168,76,0.35); font-variant-numeric: tabular-nums; }
+  .sc-score small { font-size: 18px; color: var(--muted); font-family: var(--sans); font-weight: 500; }
+  .sc-tag { display: inline-block; margin: 10px 0 12px; padding: 5px 12px; border-radius: 30px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: var(--gold-light); }
+  .sc-text { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; color: var(--cream); }
+  .sc-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(201,168,76,0.15); gap: 10px; flex-wrap: wrap; }
+  .sc-brand { font-family: var(--serif); font-weight: 900; font-size: 12px; letter-spacing: 0.1em; color: var(--gold); }
+  .sc-share { padding: 9px 14px; border-radius: 9px; border: none; background: var(--gold); color: var(--black); font-size: 12px; font-weight: 700; cursor: pointer; }
+  .sc-share:hover { background: var(--gold-light); }
+  .pair-signs { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .pair-plus { font-family: var(--serif); font-size: 22px; color: var(--gold); }
+  .pair-names { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--cream); line-height: 1.15; }
+
+  /* Demo controls */
+  .demo { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; padding: 12px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--border); }
+  .demo label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .demo input, .demo select { flex: 1 1 120px; min-width: 0; padding: 10px 12px; background: var(--deep); border: 1.5px solid rgba(201,168,76,0.2); border-radius: 9px; color: var(--text); font-size: 14px; font-family: var(--sans); outline: none; }
+  .demo input:focus, .demo select:focus { border-color: var(--gold); }
+  .art-toggle { display: flex; border: 1.5px solid rgba(201,168,76,0.2); border-radius: 9px; overflow: hidden; }
+  .art-toggle button { padding: 0 14px; background: var(--deep); border: none; color: var(--muted); font-size: 14px; font-weight: 700; cursor: pointer; }
+  .art-toggle button.on { background: rgba(201,168,76,0.15); color: var(--gold-light); }
+  .demo-hint { font-size: 11px; color: var(--muted); }
+
+  /* Gallery */
+  .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) {
+    .gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; margin-inline: -24px; padding-inline: 24px; }
+    .story { flex: 0 0 210px; scroll-snap-align: center; }
+  }
+  .story { position: relative; aspect-ratio: 9 / 16; max-width: 100%; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; padding: 20px 16px 16px; border: 1px solid rgba(201,168,76,0.22); }
+  .story.v1 { background: linear-gradient(170deg, #3D1F6E 0%, #150C28 70%); }
+  .story.v2 { background: linear-gradient(170deg, #1B1430 0%, #0A080F 70%); }
+  .story.v3 { background: linear-gradient(170deg, #2A1046 0%, #0D0A18 75%); }
+  .story.v4 { background: linear-gradient(170deg, #4A2A12 0%, #150C14 55%, #0A080F 100%); }
+  .st-top { display: flex; align-items: center; gap: 8px; }
+  .st-sign { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .st-kind { margin-top: auto; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .st-quote { font-family: var(--serif); font-style: italic; font-weight: 700; font-size: 19px; line-height: 1.3; color: var(--cream); text-wrap: balance; }
+  .st-big { font-family: var(--serif); font-weight: 900; font-size: 56px; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .st-big small { font-size: 18px; color: var(--muted); font-family: var(--sans); font-weight: 500; }
+  .st-text { font-size: 13px; color: var(--text); line-height: 1.45; margin-top: 8px; }
+  .st-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 14px; }
+  .st-brand { font-family: var(--serif); font-weight: 900; font-size: 10px; letter-spacing: 0.12em; color: var(--gold); }
+  .st-share { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(201,168,76,0.35); background: rgba(0,0,0,0.3); color: var(--gold-light); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .st-share:hover { background: var(--gold); color: var(--black); }
+
+  /* Signs grid */
+  .signs-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  @media (max-width: 860px) { .signs-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 480px) { .signs-grid { grid-template-columns: repeat(3, 1fr); } }
+  .sign-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 16px 8px 14px; text-align: center; transition: border-color .2s, transform .2s; cursor: pointer; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .sign-card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+  .sign-card-name { font-size: 12px; font-weight: 600; color: var(--cream); margin-top: 4px; }
+  .sign-card-score { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+  /* Pricing */
+  .period-toggle { display: flex; justify-content: center; margin: -16px 0 36px; }
+  .pt-inner { display: inline-flex; padding: 4px; border-radius: 40px; background: var(--card-bg); border: 1px solid var(--border); }
+  .pt-btn { position: relative; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: background .15s, color .15s; display: inline-flex; align-items: center; gap: 8px; }
+  .pt-btn.on { background: var(--gold); color: var(--black); }
+  .save-pill { padding: 2px 7px; border-radius: 10px; background: var(--purple); color: var(--gold-light); font-size: 10px; font-weight: 700; letter-spacing: 0.04em; }
+  .pt-btn.on .save-pill { background: var(--black); }
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 20px; max-width: 760px; margin: 0 auto; align-items: stretch; }
+  @media (max-width: 720px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .plan { display: flex; flex-direction: column; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 28px 24px; }
+  .plan-pro { background: linear-gradient(150deg, #22123F, #110D1C 70%); border-color: rgba(201,168,76,0.45); position: relative; overflow: hidden; }
+  .plan-pro::before { content: ''; position: absolute; top: -50px; right: -50px; width: 170px; height: 170px; background: radial-gradient(circle, rgba(61,31,110,0.7) 0%, transparent 70%); pointer-events: none; }
+  .plan-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; min-height: 22px; }
+  .plan-name { font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .plan-badge { padding: 3px 9px; border-radius: 5px; background: var(--gold); color: var(--black); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
+  .plan-price { font-family: var(--serif); font-size: 50px; font-weight: 900; color: var(--cream); line-height: 1; font-variant-numeric: tabular-nums; }
+  .plan-price span { font-size: 16px; font-family: var(--sans); font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .plan-intro { font-size: 13px; color: var(--muted); margin-top: 8px; min-height: 40px; line-height: 1.5; }
+  .plan-intro strong { color: var(--gold-light); font-weight: 600; }
+  .plan-divider { height: 1px; background: var(--border); margin: 18px 0; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; flex: 1; }
+  .plan-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text); line-height: 1.4; }
+  .plan-features li::before { content: '✦'; color: var(--gold); font-size: 11px; margin-top: 3px; flex-shrink: 0; }
+  .plan-btn { width: 100%; padding: 15px; border-radius: 11px; border: none; cursor: pointer; font-size: 15px; font-weight: 700; transition: all .15s; }
+  .plan-btn-free { background: transparent; border: 1.5px solid var(--border-strong); color: var(--cream); }
+  .plan-btn-free:hover { border-color: var(--gold); }
+  .plan-btn-pro { background: var(--gold); color: var(--black); }
+  .plan-btn-pro:hover { background: var(--gold-light); }
+  .plan-fine { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; }
+
+  /* Compare table */
+  .compare-wrap { max-width: 760px; margin: 40px auto 0; overflow-x: auto; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); }
+  .compare { width: 100%; border-collapse: collapse; min-width: 460px; }
+  .compare caption { text-align: left; padding: 18px 20px 6px; font-family: var(--serif); font-weight: 700; font-size: 18px; color: var(--cream); }
+  .compare th, .compare td { padding: 12px 20px; text-align: left; font-size: 14px; border-top: 1px solid rgba(201,168,76,0.08); vertical-align: top; }
+  .compare thead th { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700; border-top: none; }
+  .compare thead th:last-child { color: var(--gold); }
+  .compare td:first-child { color: var(--text); }
+  .compare td:not(:first-child) { color: var(--muted); white-space: nowrap; width: 26%; }
+  .compare td.yes { color: var(--gold-light); font-weight: 600; }
+  .compare td.no { color: rgba(155,143,192,0.45); }
+
+  /* FAQ */
+  .faq { display: flex; flex-direction: column; gap: 10px; max-width: 640px; margin: 0 auto; }
+  .faq-item { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .faq-q { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; background: none; border: none; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--text); text-align: left; gap: 12px; }
+  .faq-q:hover { color: var(--cream); }
+  .faq-arrow { color: var(--gold); font-size: 16px; flex-shrink: 0; transition: transform .2s; }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-a { display: none; padding: 0 20px 18px; font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .faq-item.open .faq-a { display: block; }
+
+  /* Final CTA */
+  .final-cta { text-align: center; padding: 84px 24px; background: linear-gradient(180deg, transparent, rgba(61,31,110,0.22) 50%, transparent); }
+  .final-cta .cta-block { align-items: center; }
+  .final-actions { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+  footer { border-top: 1px solid var(--border); padding: 30px 24px calc(30px + env(safe-area-inset-bottom, 0px)); text-align: center; max-width: 800px; margin: 0 auto; }
+  .footer-logo { font-family: var(--serif); font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 8px; }
+  .footer-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .footer-links { display: flex; justify-content: center; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+  .footer-links a { font-size: 12px; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--gold); }
+
+  /* Toast (oferta pós-partilha) */
+  .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 140%); z-index: 500; width: min(440px, calc(100% - 32px)); background: #1A1030; border: 1.5px solid rgba(201,168,76,0.4); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); transition: transform .3s cubic-bezier(.32,.72,0,1), visibility .3s; visibility: hidden; }
+  .toast.show { transform: translate(-50%, 0); visibility: visible; }
+  .toast-txt { flex: 1; font-size: 13px; color: var(--text); line-height: 1.45; }
+  .toast-txt strong { color: var(--cream); display: block; margin-bottom: 2px; }
+  .toast-btn { padding: 9px 12px; border-radius: 9px; border: none; background: var(--gold); color: var(--black); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .toast-x { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; }
+
+  /* ---------- MODAL ---------- */
+  .ob-modal { position: fixed; inset: 0; z-index: 999; background: rgba(10,8,15,0.92); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .ob-modal.open { opacity: 1; pointer-events: all; }
+  .ob-sheet { width: 100%; max-width: 520px; max-height: 92vh; background: var(--card-bg); border-radius: 22px 22px 0 0; border: 1.5px solid rgba(201,168,76,.2); border-bottom: none; display: flex; flex-direction: column; transform: translateY(100%); transition: transform .3s cubic-bezier(.32,.72,0,1); }
+  .ob-modal.open .ob-sheet { transform: translateY(0); }
+  .ob-handle-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 10px; flex-shrink: 0; }
+  .ob-handle { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); }
+  .ob-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,255,255,.07); color: var(--muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .ob-close:hover { background: rgba(255,255,255,.14); color: var(--text); }
+  .ob-logo { font-family: var(--serif); font-weight: 900; font-size: 16px; color: var(--gold); letter-spacing: .06em; }
+  .ob-scroll { overflow-y: auto; flex: 1; padding: 0 20px calc(32px + env(safe-area-inset-bottom, 0px)); }
+  .ob-prog { display: flex; align-items: center; justify-content: center; margin-bottom: 22px; padding-top: 4px; }
+  .ob-prog-step { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; position: relative; }
+  .ob-prog-step:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: 60%; width: 80%; height: 1px; background: rgba(201,168,76,0.18); }
+  .ob-done:not(:last-child)::after { background: var(--gold); opacity: .4; }
+  .ob-prog-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(201,168,76,0.18); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); background: var(--deep); position: relative; z-index: 1; }
+  .ob-active .ob-prog-dot { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,.08); }
+  .ob-done .ob-prog-dot { border-color: var(--gold); background: var(--gold); color: var(--black); }
+  .ob-prog-lbl { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .ob-active .ob-prog-lbl { color: var(--gold); }
+  .ob-step { display: none; flex-direction: column; gap: 16px; }
+  .ob-step.active { display: flex; }
+  .ob-eyebrow { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); opacity: .8; }
+  .ob-title { font-family: var(--serif); font-weight: 900; font-size: clamp(21px,5vw,26px); color: var(--cream); line-height: 1.15; }
+  .ob-sub { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: -6px; }
+  .ob-signs-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+  .ob-sign-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; background: var(--deep); border: 1.5px solid rgba(201,168,76,.18); border-radius: 11px; cursor: pointer; transition: all .15s; color: var(--text); }
+  .ob-sign-btn:hover { border-color: rgba(201,168,76,.4); }
+  .ob-sign-btn.ob-picked { border-color: var(--gold); background: rgba(201,168,76,.1); }
+  .ob-sign-btn span { font-size: 10px; color: var(--muted); }
+  .ob-field { display: flex; flex-direction: column; gap: 5px; }
+  .ob-field label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .ob-field input { padding: 12px 14px; background: var(--deep); border: 1.5px solid rgba(201,168,76,.18); border-radius: 10px; font-size: 14px; color: var(--text); font-family: var(--sans); outline: none; width: 100%; }
+  .ob-field input::placeholder { color: rgba(155,143,192,.45); }
+  .ob-field input:focus { border-color: var(--gold); }
+  .ob-field-err { font-size: 11px; color: #E86A6A; }
+  .ob-note { font-size: 12px; color: var(--muted); line-height: 1.55; padding: 12px 14px; border-radius: 10px; background: rgba(61,31,110,0.25); border: 1px solid rgba(155,143,192,0.2); }
+  .ob-consent-row { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: none; border: none; text-align: left; color: inherit; }
+  .ob-consent-check { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid rgba(201,168,76,.35); background: var(--deep); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .ob-consent-check.checked { background: var(--gold); border-color: var(--gold); }
+  .ob-consent-check.checked::after { content: '✓'; color: var(--black); font-size: 11px; font-weight: 700; }
+  .ob-consent-check.err { outline: 2px solid #E86A6A; }
+  .ob-consent-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .ob-plan-opt { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--deep); border: 1.5px solid rgba(201,168,76,.18); border-radius: 12px; cursor: pointer; transition: all .15s; text-align: left; color: inherit; width: 100%; }
+  .ob-plan-opt:hover { border-color: rgba(201,168,76,.35); }
+  .ob-plan-opt.picked { border-color: var(--gold); background: rgba(201,168,76,.07); }
+  .ob-plan-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(201,168,76,.35); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .ob-plan-opt.picked .ob-plan-radio { border-color: var(--gold); background: var(--gold); }
+  .ob-plan-opt.picked .ob-plan-radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--black); }
+  .ob-plan-t { font-size: 14px; font-weight: 700; color: var(--cream); }
+  .ob-plan-d { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ob-plan-p { font-family: var(--serif); font-size: 18px; font-weight: 700; color: var(--gold); text-align: right; font-variant-numeric: tabular-nums; }
+  .ob-plan-pd { font-size: 10px; color: var(--muted); text-align: right; }
+  .ob-co-summary { background: linear-gradient(145deg,#160F2C,var(--deep)); border: 1.5px solid rgba(201,168,76,.25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .ob-co-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .ob-co-lbl { font-size: 13px; color: var(--muted); }
+  .ob-co-val { font-size: 13px; color: var(--text); font-weight: 600; }
+  .ob-co-total { font-family: var(--serif); font-size: 22px; font-weight: 900; color: var(--gold); }
+  .ob-co-note { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5; }
+  .ob-btn-primary { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--gold); color: var(--black); font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .ob-btn-primary:hover { background: var(--gold-light); }
+  .ob-btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+  .ob-btn-sec { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; text-align: center; padding: 4px; }
+  .ob-btn-sec:hover { color: var(--text); }
+  .ob-loading { flex-direction: column; align-items: center; gap: 14px; padding: 28px; text-align: center; }
+  .ob-spinner { width: 36px; height: 36px; border: 3px solid rgba(201,168,76,.15); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ob-loading-txt { font-size: 13px; color: var(--muted); }
+  .ob-success { flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 4px; }
+  .ob-success h2 { font-family: var(--serif); font-size: 26px; font-weight: 900; color: var(--cream); }
+  .ob-success p { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 320px; }
+  .ob-stripe-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: var(--muted); }
+
+  @media (max-width: 480px) {
+    nav { padding-left: 16px; padding-right: 16px; }
+    .hero { padding-left: 16px; padding-right: 16px; }
+    .wrap { padding-inline: 16px; }
+    section { padding-block: 64px; }
+    .ticker-wrap { margin-left: -16px; margin-right: -16px; }
+    .gallery { margin-inline: -16px; padding-inline: 16px; }
+    .btn-main, .btn-ghost { width: 100%; }
+    .cta-block { width: 100%; }
+  }
+</style>
+
+<!-- Gradiente dourado partilhado pelos ícones -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="goldGradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#E8C96A"/>
+    <stop offset="50%" stop-color="#C9A84C"/>
+    <stop offset="100%" stop-color="#a07820"/>
+  </linearGradient>
+</defs></svg>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#top">ASTRODRAMA</a>
+  <div class="nav-links">
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#os-meus">Debaixo de Olho</a>
+    <a href="#precos">Preços</a>
+    <button class="nav-cta" onclick="startFree('nav')">Ver o meu drama</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-stars"></div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">✦ Boletim do Drama · todos os dias ✦</p>
+      <h1 class="hero-title">Como está o teu drama <em>hoje?</em></h1>
+      <p class="hero-sub">O horóscopo que ninguém pediu e toda a gente partilha. Uma nota de 0 a 10, cinco blocos de verdades inconvenientes e <strong>astrologia sincera.</strong></p>
+      <div class="hero-actions">
+        <div class="cta-block">
+          <button class="btn-main" onclick="startFree('hero')">Ver o meu drama de hoje</button>
+          <span class="btn-fine">Grátis. Sem cartão. Sem conta.</span>
+        </div>
+        <div class="cta-block">
+          <button class="btn-ghost" onclick="startPro('hero','pro_monthly')">Experimentar PRO por 0,99 €</button>
+          <span class="btn-fine">Depois 3,99 €/mês, cancela quando quiseres.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrap" aria-label="Exemplo de Boletim do Drama de Escorpião">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="ph-top">
+            <span class="ph-logo">ASTRODRAMA</span>
+            <span class="ph-date" id="phDate">Hoje</span>
+          </div>
+          <div class="ph-sign">
+            <span id="phIcon"></span>
+            <div>
+              <div class="ph-sign-name">Escorpião</div>
+              <div class="ph-sign-sub">Boletim do Drama</div>
+            </div>
+          </div>
+          <div class="ph-block">
+            <div class="ph-block-head"><span class="ph-lbl">Drama</span><span class="ph-score big">8,8<small>/10</small></span></div>
+            <span class="ph-tag">NÃO PODEMOS FAZER NADA</span>
+            <p class="ph-text">Plutão acordou desconfiado e tu também. Vais reler uma mensagem antiga três vezes e encontrar um sentido novo em cada uma.</p>
+          </div>
+          <div class="ph-block">
+            <div class="ph-block-head"><span class="ph-lbl">Amor</span><span class="ph-score">6,4<small>/10</small></span></div>
+            <p class="ph-text" style="margin-top:4px">Alguém quer falar contigo. Tu queres que essa pessoa adivinhe.</p>
+          </div>
+          <div class="ph-block">
+            <span class="ph-lbl">Estatística completamente necessária</span>
+            <div class="ph-stat">91%</div>
+            <p class="ph-text">dos Escorpiões vai dizer «não estou chateado» hoje. Os outros 9% nem isso.</p>
+          </div>
+          <div class="ph-lock">
+            <span class="ph-lock-txt">PESSOA A OBSERVAR<span style="display:block;margin-top:3px;color:var(--gold-light);font-size:12px;letter-spacing:.08em">GÉMEOS</span></span>
+            <span class="ph-lock-btn">Descobrir</span>
+          </div>
+          <div class="ph-lock">
+            <span class="ph-lock-txt">ALERTA DO DIA<span style="display:block;margin-top:3px">Depois das 22:47… <span class="blur">não abras</span></span></span>
+            <span class="ph-lock-btn">Ver o alerta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker-wrap" aria-hidden="true"><div class="ticker" id="ticker"></div></div>
+</header>
+
+<main>
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona" class="wrap">
+    <p class="section-eyebrow">✦ Como funciona ✦</p>
+    <h2 class="section-title">Três passos.<br>O drama faz o resto.</h2>
+    <p class="section-sub">Não tens de instalar nada, nem de explicar a ninguém porque é que estás a rir sozinho no metro.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3 class="step-title">Escolhe o teu signo</h3>
+        <p class="step-text">Sem conta, sem formulário de catorze campos. Um toque e já estás a ler.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3 class="step-title">Recebe o boletim todos os dias</h3>
+        <p class="step-text">Todas as manhãs há um drama novo à tua espera. Lês aqui, ou segues o nosso Canal de WhatsApp gratuito, onde aparecem as notas dos 12 signos com o link para o teu.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3 class="step-title">Partilha (ou envia a quem merece)</h3>
+        <p class="step-text">Cada bloco vira um cartão para Stories ou WhatsApp. Usa com moderação. Ou não.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OS MEUS E O NOSSO DRAMA -->
+  <section id="os-meus" class="wrap" style="padding-top:20px">
+    <p class="section-eyebrow">✦ Novo ✦</p>
+    <h2 class="section-title">Debaixo de Olho e O Nosso Drama</h2>
+    <p class="section-sub">Agora também dá para fazer drama sobre os outros. Só precisas do nome e do signo. Eles não precisam de conta. Nem de saber.</p>
+
+    <div class="duo">
+      <div class="duo-col">
+        <div class="duo-head">
+          <h3 class="duo-name">Debaixo de Olho</h3>
+          <span class="duo-limit">Grátis: 1 pessoa · PRO: até 10</span>
+        </div>
+        <p class="duo-desc">Adiciona a mãe, o colega da secretária ao lado ou aquela pessoa. Vês o boletim do signo dela, com o nome lá dentro.</p>
+
+        <div class="share-card" id="omCard">
+          <p class="sc-eyebrow">Debaixo de Olho · Hoje</p>
+          <div class="sc-who">
+            <span id="omIcon"></span>
+            <div>
+              <div class="sc-who-name" id="omName">Rita</div>
+              <div class="sc-who-sign" id="omSignName">Carneiro</div>
+            </div>
+          </div>
+          <div class="sc-score" id="omScore">7,6<small>/10</small></div>
+          <span class="sc-tag" id="omTag">PAVIO CURTO, AGENDA CHEIA</span>
+          <p class="sc-text" id="omText">Hoje a Rita vai responder «ok» com ponto final. Interpreta como quiseres, mas interpreta com cuidado.</p>
+          <div class="sc-foot">
+            <span class="sc-brand">ASTRODRAMA</span>
+            <button class="sc-share" onclick="shareCard('os_meus')">Isto és TU</button>
+          </div>
+        </div>
+
+        <div class="demo" role="group" aria-label="Experimenta com alguém teu">
+          <label for="omInput">Nome ou alcunha</label>
+          <input id="omInput" type="text" maxlength="24" value="Rita" placeholder="Nome ou alcunha" autocomplete="off">
+          <div class="art-toggle" role="group" aria-label="Artigo">
+            <button id="artA" class="on" onclick="setArticle('a')" aria-pressed="true">a</button>
+            <button id="artO" onclick="setArticle('o')" aria-pressed="false">o</button>
+          </div>
+          <label for="omSelect">Signo</label>
+          <select id="omSelect"></select>
+        </div>
+        <p class="demo-hint">Experimenta com alguém teu. Fica só neste ecrã.</p>
+      </div>
+
+      <div class="duo-col">
+        <div class="duo-head">
+          <h3 class="duo-name">O Nosso Drama</h3>
+          <span class="duo-limit">Grátis: 1 por semana · PRO: todos os dias</span>
+        </div>
+        <p class="duo-desc">Dois nomes, dois signos, uma nota para a relação. Serve para casais, melhores amigos e aquela parceria de trabalho que ninguém percebe.</p>
+
+        <div class="share-card">
+          <p class="sc-eyebrow">O Nosso Drama · Hoje</p>
+          <div class="pair-signs">
+            <span id="pairIconA"></span>
+            <span class="pair-plus">+</span>
+            <span id="pairIconB"></span>
+            <div class="pair-names" style="margin-left:6px">Rita<br>&amp; Tiago</div>
+          </div>
+          <div class="sc-score">7,9<small>/10</small></div>
+          <span class="sc-tag">QUÍMICA COM AVISO PRÉVIO</span>
+          <p class="sc-text">Um quer resolver já. O outro quer resolver em 2027. Hoje encontram-se a meio: numa discussão sobre onde jantar.</p>
+          <div class="sc-foot">
+            <span class="sc-brand">ASTRODRAMA</span>
+            <button class="sc-share" onclick="shareCard('o_nosso_drama')">Enviar ao par</button>
+          </div>
+        </div>
+        <button class="btn-ghost" onclick="startFree('o_nosso_drama')">Ver o drama do vosso par</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERIA -->
+  <section id="cartoes" class="wrap" style="padding-top:20px">
+    <p class="section-eyebrow">✦ Cartões partilháveis ✦</p>
+    <h2 class="section-title">Feito para ser <em>roubado.</em></h2>
+    <p class="section-sub">Cada bloco do boletim vira um cartão para Stories. Grátis, sempre. A nossa marca vai junto: os astros também têm contas para pagar.</p>
+    <div class="gallery">
+      <article class="story v1">
+        <div class="st-top"><span data-icon="leo" data-size="30"></span><span class="st-sign">Leão</span></div>
+        <p class="st-kind">Frase do dia</p>
+        <p class="st-quote">«Não estou a exagerar. Estou a narrar com intensidade.»</p>
+        <div class="st-foot"><span class="st-brand">ASTRODRAMA</span><button class="st-share" aria-label="Partilhar Frase do Dia" onclick="shareCard('frase_do_dia')">↗</button></div>
+      </article>
+      <article class="story v2">
+        <div class="st-top"><span data-icon="virgo" data-size="30"></span><span class="st-sign">Virgem</span></div>
+        <p class="st-kind">Estatística completamente necessária</p>
+        <p class="st-big">87%</p>
+        <p class="st-text">das listas que fizeste hoje têm uma sub-lista. Uma delas tem anexos.</p>
+        <div class="st-foot"><span class="st-brand">ASTRODRAMA</span><button class="st-share" aria-label="Partilhar Estatística" onclick="shareCard('estatistica')">↗</button></div>
+      </article>
+      <article class="story v3">
+        <div class="st-top"><span data-icon="gemini" data-size="30"></span><span class="st-sign">Gémeos</span></div>
+        <p class="st-kind">Foste apanhado/a</p>
+        <p class="st-quote">A ensaiar no duche uma discussão que nunca vai acontecer. E a ganhar.</p>
+        <div class="st-foot"><span class="st-brand">ASTRODRAMA</span><button class="st-share" aria-label="Partilhar Foste Apanhado" onclick="shareCard('foste_apanhado')">↗</button></div>
+      </article>
+      <article class="story v4">
+        <div class="st-top"><span data-icon="pisces" data-size="30"></span><span class="st-sign">Peixes</span></div>
+        <p class="st-kind">Drama</p>
+        <p class="st-big">9,1<small>/10</small></p>
+        <p class="st-text">CHORAR É UM PLANO. Viste um vídeo de um cão a reencontrar o dono. O dia acabou aí.</p>
+        <div class="st-foot"><span class="st-brand">ASTRODRAMA</span><button class="st-share" aria-label="Partilhar Drama" onclick="shareCard('drama')">↗</button></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SIGNOS -->
+  <section class="wrap" style="padding-top:20px">
+    <p class="section-eyebrow">✦ Os 12 signos ✦</p>
+    <h2 class="section-title">Ninguém escapa.</h2>
+    <p class="section-sub">Podes ver o drama de todos os signos, de graça. Sim, também o do teu ex.</p>
+    <div class="signs-grid" id="signsGrid"></div>
+  </section>
+
+  <!-- PREÇOS -->
+  <section id="precos" class="wrap">
+    <p class="section-eyebrow">✦ Planos ✦</p>
+    <h2 class="section-title">Dois planos.<br>Nenhum drama na escolha.</h2>
+    <p class="section-sub">O que se partilha é grátis. O que te vai deixar a pensar o dia todo é PRO.</p>
+
+    <div class="period-toggle">
+      <div class="pt-inner" role="group" aria-label="Período de faturação">
+        <button class="pt-btn on" id="ptMonthly" onclick="setPeriod('monthly')" aria-pressed="true">Mensal</button>
+        <button class="pt-btn" id="ptAnnual" onclick="setPeriod('annual')" aria-pressed="false">Anual <span class="save-pill">Poupa 37%</span></button>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="plan-top"><span class="plan-name">Free</span></div>
+        <div class="plan-price">0 €</div>
+        <p class="plan-intro">Para sempre. Sem cartão, sem letras pequenas.</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Boletim diário completo: Drama, Amor, Estatística, Foste Apanhado/a e Frase do Dia</li>
+          <li>Cartões partilháveis de qualquer bloco</li>
+          <li>O boletim dos outros 11 signos</li>
+          <li>Arquivo dos últimos 3 dias</li>
+          <li>Debaixo de Olho: 1 pessoa</li>
+          <li>O Nosso Drama: 1 cartão por semana</li>
+        </ul>
+        <button class="plan-btn plan-btn-free" onclick="startFree('pricing')">Ver o meu drama de hoje</button>
+        <p class="plan-fine">Começas em 5 segundos.</p>
+      </div>
+
+      <div class="plan plan-pro">
+        <div class="plan-top"><span class="plan-name">PRO</span><span class="plan-badge" id="proBadge">1.º mês a 0,99 €</span></div>
+        <div class="plan-price" id="proPrice">0,99 €<span>no 1.º mês</span></div>
+        <p class="plan-intro" id="proIntro">Depois <strong>3,99 €/mês</strong>. Cancela quando quiseres.</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Tudo o que está no Free</li>
+          <li><strong>Pessoa a Observar</strong>: o signo que te vai testar hoje</li>
+          <li><strong>Alerta do Dia</strong>: a hora exata e o aviso</li>
+          <li>Previsão da semana e do mês</li>
+          <li>Debaixo de Olho: até 10 pessoas</li>
+          <li>O Nosso Drama todos os dias, pares ilimitados</li>
+          <li>O boletim do teu signo por email ou notificação, à hora que escolheres</li>
+          <li>Arquivo completo</li>
+        </ul>
+        <button class="plan-btn plan-btn-pro" id="proBtn" onclick="startPro('pricing', currentProPlan())">Experimentar PRO por 0,99 €</button>
+        <p class="plan-fine" id="proFine">Renovação automática via Stripe. Cancelas em dois toques.</p>
+      </div>
+    </div>
+
+    <div class="compare-wrap">
+      <table class="compare">
+        <caption>Free vs PRO, linha a linha</caption>
+        <thead><tr><th scope="col">O quê</th><th scope="col">Free</th><th scope="col">PRO</th></tr></thead>
+        <tbody>
+          <tr><td>Boletim diário completo do teu signo</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Cartões partilháveis</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Boletim dos outros 11 signos</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Arquivo</td><td>3 dias</td><td class="yes">Completo</td></tr>
+          <tr><td>Debaixo de Olho</td><td>1 pessoa</td><td class="yes">Até 10</td></tr>
+          <tr><td>O Nosso Drama</td><td>1 por semana</td><td class="yes">Diário, ilimitado</td></tr>
+          <tr><td>Pessoa a Observar</td><td>Só o signo</td><td class="yes">✓</td></tr>
+          <tr><td>Alerta do Dia</td><td>Só a hora</td><td class="yes">✓</td></tr>
+          <tr><td>Previsão da semana e do mês</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td>Canal de WhatsApp (notas dos 12 signos, todas as manhãs)</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Boletim do teu signo por email ou notificação, à hora que escolheres</td><td class="no">—</td><td class="yes">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="wrap" style="padding-top:20px">
+    <p class="section-eyebrow">✦ Dúvidas ✦</p>
+    <h2 class="section-title" style="margin-bottom:36px">Perguntas que os astros<br>já tinham previsto.</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">O que é o PRO? <span class="faq-arrow">↓</span></button>
+        <p class="faq-a">São as partes do boletim que te deixam a pensar o dia todo: quem te vai testar hoje (Pessoa a Observar), a que horas convém não abrir o WhatsApp (Alerta do Dia), a previsão da semana e do mês, até 10 pessoas Debaixo de Olho, O Nosso Drama todos os dias e o boletim do teu signo entregue por email ou notificação, à hora que escolheres. O boletim normal continua grátis.</p>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Quando passa a 3,99 €? <span class="faq-arrow">↓</span></button>
+        <p class="faq-a">O primeiro mês custa 0,99 €. A partir do segundo, 3,99 €/mês, com renovação automática. Avisamos-te por email antes da primeira renovação. Se preferires o anual, pagas 29,99 € uma vez (cerca de 2,50 €/mês) e não pensas mais nisso até para o ano.</p>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Como cancelo? <span class="faq-arrow">↓</span></button>
+        <p class="faq-a">Na tua conta, em dois toques. Mantens o PRO até ao fim do período que já pagaste. Sem chamadas, sem emails a implorar, sem «tem a certeza?» em cinco ecrãs seguidos.</p>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Isto é astrologia a sério? <span class="faq-arrow">↓</span></button>
+        <p class="faq-a">É astrologia sincera. Dizemos-te o que os astros diriam se não tivessem filtro nem vontade de agradar. Não é para levar à letra: é entretenimento. Se alguma coisa acertar, os astros aceitam o crédito.</p>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">A pessoa que ponho Debaixo de Olho fica a saber? <span class="faq-arrow">↓</span></button>
+        <p class="faq-a">Só se lhe enviares o cartão. Guardamos apenas o nome (ou alcunha) e o signo. Mais nada sobre ela.</p>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Como recebo o boletim? <span class="faq-arrow">↓</span></button>
+        <p class="faq-a">No site, todas as manhãs. Se quiseres um lembrete, segue o Canal de WhatsApp da Astro Drama: é grátis, não precisas de dar o teu número e todas as manhãs lá aparecem as notas dos 12 signos com o link para o boletim completo. É a mesma publicação para toda a gente; para receber só o teu signo, à hora que escolheres, por email ou notificação no telemóvel, isso é no PRO. Dica: no canal, toca no sino para não perderes nenhuma publicação.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <div class="final-cta">
+    <p class="section-eyebrow">✦ O drama chama ✦</p>
+    <h2 class="section-title">Os astros já escreveram o teu dia.<br>Falta leres.</h2>
+    <p class="section-sub" style="margin-bottom:32px">Demora menos do que decidir o que vais almoçar.</p>
+    <div class="final-actions">
+      <div class="cta-block">
+        <button class="btn-main" onclick="startFree('final')">Ver o meu drama de hoje</button>
+        <span class="btn-fine">Grátis. Sem cartão.</span>
+      </div>
+      <button class="btn-ghost" onclick="startPro('final','pro_monthly')">Experimentar PRO por 0,99 €</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-logo">ASTRODRAMA</div>
+  <p class="footer-text">Entretenimento. Não substitui terapia, nem os teus amigos.<br>© 2026 Astro Drama · Feito com drama em Portugal</p>
+  <div class="footer-links">
+    <a href="#">Privacidade</a>
+    <a href="#">Termos</a>
+    <a href="#">Contacto</a>
+    <a href="#">Canal de WhatsApp</a>
+    <a href="#">Instagram</a>
+  </div>
+</footer>
+
+<!-- Toast: oferta PRO depois de partilhar -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <div class="toast-txt" id="toastTxt"><strong>Partilhado.</strong>Já agora: queres saber quem te vai testar hoje?</div>
+  <button class="toast-btn" onclick="startPro('after_share','pro_monthly')">PRO por 0,99 €</button>
+  <button class="toast-x" onclick="hideToast()" aria-label="Fechar">✕</button>
+</div>
+
+<!-- MODAL -->
+<div class="ob-modal" id="obModal" onclick="if(event.target===this)closeModal()">
+  <div class="ob-sheet" role="dialog" aria-modal="true" aria-labelledby="obTitle1">
+    <div class="ob-handle-bar">
+      <div class="ob-handle"></div>
+      <div class="ob-logo">ASTRODRAMA</div>
+      <button class="ob-close" onclick="closeModal()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="ob-scroll" id="obScroll">
+      <div class="ob-prog" id="obProgress"></div>
+
+      <!-- Passo 1: signo -->
+      <div class="ob-step active" id="obStep1">
+        <p class="ob-eyebrow" id="obEyebrow1">✦ Passo 1 de 3 ✦</p>
+        <h2 class="ob-title" id="obTitle1">Qual é o teu signo?</h2>
+        <p class="ob-sub" id="obSub1">Um toque e vês o teu drama de hoje.</p>
+        <div class="ob-signs-grid" id="obSignsGrid"></div>
+        <button class="ob-btn-primary" id="obBtn1" onclick="obNextFromSign()" disabled>Escolhe um signo</button>
+      </div>
+
+      <!-- Passo 2: conta PRO -->
+      <div class="ob-step" id="obStep2">
+        <p class="ob-eyebrow">✦ Passo 2 de 3 ✦</p>
+        <h2 class="ob-title">Para quem é o PRO?</h2>
+        <p class="ob-sub">Só precisamos disto para a tua conta e o recibo.</p>
+        <div class="ob-field">
+          <label for="obFname">O teu nome</label>
+          <input type="text" id="obFname" placeholder="Como te chamam os astros" autocomplete="given-name">
+          <span class="ob-field-err" id="obErrFname" hidden>Precisamos de um nome. Pode ser alcunha.</span>
+        </div>
+        <div class="ob-field">
+          <label for="obFemail">Email</label>
+          <input type="email" id="obFemail" placeholder="tu@exemplo.pt" autocomplete="email">
+          <span class="ob-field-err" id="obErrEmail" hidden>Esse email não parece real. Confirma lá.</span>
+        </div>
+        <button class="ob-consent-row" type="button" onclick="obToggleConsent()">
+          <span class="ob-consent-check" id="obConsentCheck"></span>
+          <span class="ob-consent-text">Aceito os Termos e percebo que isto é entretenimento. Podes enviar-me o aviso antes de cada renovação.</span>
+        </button>
+        <p class="ob-note">Com o PRO recebes o boletim do teu signo por email ou notificação, à hora que escolheres. Escolhes a hora depois do pagamento. As notas dos 12 signos também saem todas as manhãs no nosso Canal de WhatsApp gratuito.</p>
+        <button class="ob-btn-primary" onclick="obValidateStep2()">Continuar</button>
+        <button class="ob-btn-sec" onclick="obGoStep(1)">← Voltar</button>
+      </div>
+
+      <!-- Passo 3: plano -->
+      <div class="ob-step" id="obStep3">
+        <p class="ob-eyebrow">✦ Passo 3 de 3 ✦</p>
+        <h2 class="ob-title">Escolhe o teu PRO.</h2>
+        <p class="ob-sub">Os dois desbloqueiam tudo. Só muda a forma de pagar.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="ob-plan-opt" id="obPlanMonthly" onclick="obSetPlan('pro_monthly')">
+            <span class="ob-plan-radio"></span>
+            <span style="flex:1"><span class="ob-plan-t" style="display:block">PRO mensal</span><span class="ob-plan-d" style="display:block">0,99 € no 1.º mês, depois 3,99 €/mês</span></span>
+            <span><span class="ob-plan-p" style="display:block">0,99 €</span><span class="ob-plan-pd" style="display:block">hoje</span></span>
+          </button>
+          <button class="ob-plan-opt" id="obPlanAnnual" onclick="obSetPlan('pro_annual')">
+            <span class="ob-plan-radio"></span>
+            <span style="flex:1"><span class="ob-plan-t" style="display:block">PRO anual <span class="save-pill">Poupa 37%</span></span><span class="ob-plan-d" style="display:block">≈ 2,50 €/mês, pagas uma vez</span></span>
+            <span><span class="ob-plan-p" style="display:block">29,99 €</span><span class="ob-plan-pd" style="display:block">/ano</span></span>
+          </button>
+        </div>
+        <div class="ob-co-summary">
+          <div class="ob-co-row"><span class="ob-co-lbl" id="obCoName">Astro Drama PRO mensal</span><span class="ob-co-val" id="obCoVal">1.º mês</span></div>
+          <div style="height:1px;background:rgba(201,168,76,.15)"></div>
+          <div class="ob-co-row"><span style="font-size:14px;font-weight:700;color:var(--cream)">Total hoje</span><span class="ob-co-total" id="obCoTotal">0,99 €</span></div>
+          <p class="ob-co-note" id="obCoNote">Depois 3,99 €/mês, renovação automática. Cancela quando quiseres.</p>
+        </div>
+        <div class="ob-loading" id="obPayLoading" hidden style="display:flex">
+          <div class="ob-spinner"></div>
+          <p class="ob-loading-txt">A abrir o pagamento seguro…</p>
+        </div>
+        <button class="ob-btn-primary" id="obBtnPay" onclick="obCheckout()">Pagar 0,99 € e desbloquear</button>
+        <p class="ob-stripe-note">Pagamento seguro via <strong style="color:var(--text)">Stripe</strong> · cartão, MB WAY, Apple Pay</p>
+        <button class="ob-btn-sec" id="obBtnBack" onclick="obGoStep(2)">← Voltar</button>
+      </div>
+
+      <!-- Sucesso -->
+      <div class="ob-success" id="obSuccess" hidden style="display:flex">
+        <div style="font-size:44px;line-height:1;color:var(--gold)">✦</div>
+        <h2>Bem-vindo/a ao lado PRO do drama.</h2>
+        <p>A Pessoa a Observar e o Alerta do Dia já estão desbloqueados no teu boletim.</p>
+        <button class="ob-btn-primary" onclick="goToBoletim(ob.sign)">Ver o meu boletim completo</button>
+      </div>
+
+      <!-- PRO ainda não disponível (site público, antes de o Stripe estar ligado) -->
+      <div class="ob-success" id="obSoon" hidden style="display:flex">
+        <div style="font-size:44px;line-height:1;color:var(--gold)">✦</div>
+        <h2>O PRO abre muito em breve.</h2>
+        <p>Ainda estamos a afinar os astros. Não te cobrámos nada. Entretanto, o boletim grátis está todo disponível, todos os dias.</p>
+        <button class="ob-btn-primary" onclick="goToBoletim(ob.sign)">Ver o meu drama de hoje</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://astrodrama-backend-production-d856.up.railway.app';
+  // No domínio próprio as páginas ligam-se por links normais.
+  // Nas pré-visualizações (claude.ai) usam os links dos artifacts.
+  const PREVIEW = /claude|anthropic|usercontent/i.test(location.hostname);
+  const BOLETIM_URL = PREVIEW ? 'https://claude.ai/artifact/Erh751XZhSEVh9jCTZTcuT' : 'boletim.html';
+
+  /* ---------- Métricas (eventos para o funil) ---------- */
+  window.dataLayer = window.dataLayer || [];
+  function track(event, props = {}) {
+    const e = { event, ...props, ts: new Date().toISOString() };
+    window.dataLayer.push(e);
+    try { console.debug('[track]', e); } catch (_) {}
+  }
+  track('landing_view');
+
+  /* ---------- Signos ---------- */
+  const SIGNS = [
+    { id:'aries',       g:'♈︎', n:'Carneiro'    },
+    { id:'taurus',      g:'♉︎', n:'Touro'       },
+    { id:'gemini',      g:'♊︎', n:'Gémeos'      },
+    { id:'cancer',      g:'♋︎', n:'Caranguejo'  },
+    { id:'leo',         g:'♌︎', n:'Leão'        },
+    { id:'virgo',       g:'♍︎', n:'Virgem'      },
+    { id:'libra',       g:'♎︎', n:'Balança'     },
+    { id:'scorpio',     g:'♏︎', n:'Escorpião'   },
+    { id:'sagittarius', g:'♐︎', n:'Sagitário'   },
+    { id:'capricorn',   g:'♑︎', n:'Capricórnio' },
+    { id:'aquarius',    g:'♒︎', n:'Aquário'     },
+    { id:'pisces',      g:'♓︎', n:'Peixes'      },
+  ];
+  const FALLBACK = { aries:8.7, taurus:3.2, gemini:7.1, cancer:9.3, leo:6.8, virgo:4.4, libra:5.5, scorpio:8.8, sagittarius:5.9, capricorn:2.8, aquarius:6.3, pisces:9.1 };
+  const scores = { ...FALLBACK };
+  const fmt = n => Number(n).toFixed(1).replace('.', ',');
+  const byId = id => SIGNS.find(s => s.id === id);
+
+  function iconHTML(id, size) {
+    const s = byId(id); const r = size / 2 - 2;
+    return `<span class="sicon" style="width:${size}px;height:${size}px;display:inline-block">
+      <svg viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="url(#goldGradMain)" stroke-width="1.5"/></svg>
+      <span class="glyph" style="font-size:${Math.round(size*0.42)}px">${s.g}</span>
+    </span>`;
+  }
+  document.getElementById('phIcon').innerHTML = iconHTML('scorpio', 40);
+  document.getElementById('pairIconA').innerHTML = iconHTML('aries', 40);
+  document.getElementById('pairIconB').innerHTML = iconHTML('scorpio', 40);
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = iconHTML(el.dataset.icon, +el.dataset.size || 30); });
+
+  // Data de hoje no telemóvel
+  try {
+    document.getElementById('phDate').textContent = new Date().toLocaleDateString('pt-PT', { weekday:'short', day:'numeric', month:'short' }).replace(/\./g, '');
+  } catch (_) {}
+
+  /* ---------- Ticker + grelha ---------- */
+  function renderTicker() {
+    const items = SIGNS.map(s => `<span class="ticker-item"><span class="ticker-dot"></span><span class="g">${s.g}</span> ${s.n} · ${fmt(scores[s.id])}/10</span>`).join('');
+    document.getElementById('ticker').innerHTML = items + items;
+  }
+  function renderGrid() {
+    document.getElementById('signsGrid').innerHTML = SIGNS.map(s => `
+      <button class="sign-card" onclick="openSign('${s.id}','signs_grid')" aria-label="Ver o drama de ${s.n}">
+        ${iconHTML(s.id, 46)}
+        <span class="sign-card-name">${s.n}</span>
+        <span class="sign-card-score">${fmt(scores[s.id])}</span>
+      </button>`).join('');
+  }
+  renderTicker(); renderGrid();
+
+  (async function loadScores() {
+    const res = await Promise.allSettled(SIGNS.map(s => fetch(`${API}/api/horoscope/${s.id}`).then(r => r.ok ? r.json() : null)));
+    let changed = false;
+    res.forEach((r, i) => {
+      const v = r.status === 'fulfilled' && r.value && Number(r.value.drama_score);
+      if (v) { scores[SIGNS[i].id] = v; changed = true; }
+    });
+    if (changed) { renderTicker(); renderGrid(); }
+  })();
+
+  /* ---------- Debaixo de Olho (demo local) ---------- */
+  const OM_LINES = {
+    aries:       { s:7.6, t:'PAVIO CURTO, AGENDA CHEIA',     x:'Hoje {S} vai responder «ok» com ponto final. Interpreta como quiseres, mas interpreta com cuidado.' },
+    taurus:      { s:3.4, t:'MODO SOFÁ ATIVADO',              x:'Hoje {S} só sai de casa se houver comida no fim. Não leves para o pessoal: é mesmo só pela comida.' },
+    gemini:      { s:7.2, t:'DUAS OPINIÕES, ZERO DECISÕES',   x:'Hoje {S} vai mudar de ideias três vezes antes do almoço e defender todas com a mesma convicção.' },
+    cancer:      { s:8.9, t:'MEMÓRIA DE ELEFANTE',            x:'Hoje {S} vai lembrar-se de uma coisa que disseste em 2019. Com data, hora e tom de voz.' },
+    leo:         { s:6.7, t:'PALCO OBRIGATÓRIO',               x:'Hoje {S} precisa de um elogio até às 11h. Depois disso, a responsabilidade é tua.' },
+    virgo:       { s:4.6, t:'CORRETOR AUTOMÁTICO HUMANO',     x:'Hoje {S} vai reparar no erro que ninguém viu. E vai dizer. Com carinho, mas vai dizer.' },
+    libra:       { s:5.3, t:'INDECISÃO PREMIUM',               x:'Hoje {S} vai demorar 25 minutos a escolher um restaurante. Vai acabar no do costume.' },
+    scorpio:     { s:8.8, t:'NÃO PODEMOS FAZER NADA',          x:'Hoje {S} vai fingir que não viu os teus stories. Viu. Todos. Duas vezes.' },
+    sagittarius: { s:6.0, t:'PASSAPORTE MENTAL',               x:'Hoje {S} vai planear uma viagem que não vai fazer. Deixa. É terapêutico.' },
+    capricorn:   { s:2.9, t:'EXCEL EMOCIONAL',                 x:'Hoje {S} tem tudo sob controlo, incluindo o que não lhe pertence. Não ofereças ajuda.' },
+    aquarius:    { s:6.4, t:'LIGEIRAMENTE NOUTRO PLANETA',     x:'Hoje {S} vai responder a uma mensagem de terça-feira como se fosse a coisa mais normal do mundo.' },
+    pisces:      { s:9.1, t:'CHORAR É UM PLANO',               x:'Hoje {S} vai emocionar-se com um anúncio de detergente. Não perguntes. Passa um lenço.' },
+  };
+  const om = { name:'Rita', art:'a', sign:'aries' };
+  const omSel = document.getElementById('omSelect');
+  omSel.innerHTML = SIGNS.map(s => `<option value="${s.id}">${s.g} ${s.n}</option>`).join('');
+  omSel.value = om.sign;
+  const escapeHTML = str => str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function renderOM() {
+    const L = OM_LINES[om.sign];
+    const name = (om.name.trim() || 'Rita');
+    const subject = `${om.art} ${name}`;
+    document.getElementById('omIcon').innerHTML = iconHTML(om.sign, 44);
+    document.getElementById('omName').textContent = name;
+    document.getElementById('omSignName').textContent = byId(om.sign).n;
+    document.getElementById('omScore').innerHTML = `${fmt(L.s)}<small>/10</small>`;
+    document.getElementById('omTag').textContent = L.t;
+    document.getElementById('omText').innerHTML = escapeHTML(L.x.replace('{S}', subject));
+  }
+  let omTracked = false;
+  function omEdited() { if (!omTracked) { track('os_meus_demo_edit'); omTracked = true; } renderOM(); }
+  document.getElementById('omInput').addEventListener('input', e => { om.name = e.target.value; omEdited(); });
+  omSel.addEventListener('change', e => { om.sign = e.target.value; omEdited(); });
+  function setArticle(a) {
+    om.art = a;
+    document.getElementById('artA').classList.toggle('on', a === 'a');
+    document.getElementById('artO').classList.toggle('on', a === 'o');
+    document.getElementById('artA').setAttribute('aria-pressed', a === 'a');
+    document.getElementById('artO').setAttribute('aria-pressed', a === 'o');
+    omEdited();
+  }
+  renderOM();
+
+  /* ---------- Partilha + oferta PRO depois de partilhar ---------- */
+  const SHARE_TEXT = {
+    os_meus: () => `${document.getElementById('omText').textContent} Astro Drama`,
+    o_nosso_drama: () => 'O Nosso Drama hoje: 7,9/10. Química com aviso prévio. Astro Drama',
+    frase_do_dia: () => '«Não estou a exagerar. Estou a narrar com intensidade.» ♌︎ Astro Drama',
+    estatistica: () => '87% das listas que fizeste hoje têm uma sub-lista. ♍︎ Astro Drama',
+    foste_apanhado: () => 'Foste apanhado/a: a ensaiar no duche uma discussão que nunca vai acontecer. ♊︎ Astro Drama',
+    drama: () => 'Drama de hoje: 9,1/10. Chorar é um plano. ♓︎ Astro Drama',
+  };
+  async function shareCard(block) {
+    track('share_click', { block });
+    const text = (SHARE_TEXT[block] || (() => 'Astro Drama'))();
+    let shared = false;
+    try {
+      if (navigator.share) { await navigator.share({ text }); shared = true; }
+      else if (navigator.clipboard) { await navigator.clipboard.writeText(text); shared = true; }
+    } catch (_) {}
+    showToast(shared && !navigator.share ? 'Copiado.' : 'Partilhado.');
+  }
+  let toastTimer;
+  function showToast(head) {
+    document.getElementById('toastTxt').innerHTML = `<strong>${head}</strong>Já agora: queres saber quem te vai testar hoje?`;
+    document.getElementById('toast').classList.add('show');
+    track('paywall_view', { source:'after_share' });
+    clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 7000);
+  }
+  function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+  /* ---------- Preços: mensal / anual ---------- */
+  let period = 'monthly';
+  const currentProPlan = () => period === 'annual' ? 'pro_annual' : 'pro_monthly';
+  function setPeriod(p) {
+    period = p;
+    track('pricing_toggle', { period:p });
+    const m = p === 'monthly';
+    document.getElementById('ptMonthly').classList.toggle('on', m);
+    document.getElementById('ptAnnual').classList.toggle('on', !m);
+    document.getElementById('ptMonthly').setAttribute('aria-pressed', m);
+    document.getElementById('ptAnnual').setAttribute('aria-pressed', !m);
+    document.getElementById('proBadge').textContent = m ? '1.º mês a 0,99 €' : 'Poupa 37%';
+    document.getElementById('proPrice').innerHTML = m ? '0,99 €<span>no 1.º mês</span>' : '29,99 €<span>/ano</span>';
+    document.getElementById('proIntro').innerHTML = m
+      ? 'Depois <strong>3,99 €/mês</strong>. Cancela quando quiseres.'
+      : 'Cerca de <strong>2,50 €/mês</strong>. Pagas uma vez e dramatizas o ano inteiro.';
+    document.getElementById('proBtn').textContent = m ? 'Experimentar PRO por 0,99 €' : 'Quero o ano inteiro';
+    document.getElementById('proFine').textContent = m
+      ? 'Renovação automática via Stripe. Cancelas em dois toques.'
+      : 'Contra 47,88 € em 12 meses de mensal. Renova ao fim de um ano.';
+  }
+
+  /* ---------- FAQ ---------- */
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    item.classList.toggle('open');
+    btn.setAttribute('aria-expanded', item.classList.contains('open'));
+  }
+
+  /* ---------- Navegação para o boletim ---------- */
+  function goToBoletim(sign) {
+    const a = document.createElement('a');
+    a.href = sign ? `${BOLETIM_URL}?sign=${sign.id || sign}` : BOLETIM_URL;
+    if (PREVIEW) { a.target = '_top'; a.rel = 'noopener'; }
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function openSign(id, source) { track('sign_view', { sign:id, source }); goToBoletim(id); }
+
+  /* ---------- Modal ---------- */
+  const ob = { mode:'free', step:1, sign:null, plan:'pro_monthly', consent:false, source:'' };
+
+  function openModal() {
+    const grid = document.getElementById('obSignsGrid');
+    if (!grid.innerHTML) {
+      grid.innerHTML = SIGNS.map(s => `<button class="ob-sign-btn" data-id="${s.id}" onclick="obPickSign('${s.id}')">${iconHTML(s.id, 38)}<span>${s.n}</span></button>`).join('');
+    }
+    document.getElementById('obSuccess').hidden = true;
+    document.getElementById('obSoon').hidden = true;
+    document.getElementById('obPayLoading').hidden = true;
+    document.getElementById('obBtnPay').hidden = false;
+    document.getElementById('obBtnBack').hidden = false;
+    document.getElementById('obProgress').hidden = ob.mode === 'free';
+    document.getElementById('obEyebrow1').textContent = ob.mode === 'free' ? '✦ Grátis · sem conta ✦' : '✦ Passo 1 de 3 ✦';
+    document.getElementById('obSub1').textContent = ob.mode === 'free'
+      ? 'Um toque e vês o teu drama de hoje. Sem conta, sem cartão.'
+      : 'É o signo do boletim que vais desbloquear.';
+    obUpdateSignBtn();
+    obGoStep(1);
+    document.getElementById('obModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('obModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function startFree(source) {
+    ob.mode = 'free'; ob.source = source;
+    track('cta_free_click', { source });
+    openModal();
+  }
+  function startPro(source, plan) {
+    hideToast();
+    ob.mode = 'pro'; ob.source = source; ob.plan = plan || 'pro_monthly';
+    track('cta_pro_click', { source, plan:ob.plan });
+    obSetPlan(ob.plan, true);
+    openModal();
+  }
+
+  // Vindo do boletim (?pro=monthly&sign=scorpio&source=lock_alerta): abre logo o PRO com o signo escolhido
+  (function openProFromQuery() {
+    const q = new URLSearchParams(location.search);
+    if (!q.get('pro')) return;
+    const plan = q.get('pro') === 'annual' ? 'pro_annual' : 'pro_monthly';
+    if (plan === 'pro_annual') setPeriod('annual');
+    startPro(q.get('source') || 'boletim', plan);
+    const sign = q.get('sign');
+    if (byId(sign)) { obPickSign(sign); obGoStep(2); }
+  })();
+
+  function obGoStep(n) {
+    ob.step = n;
+    document.querySelectorAll('.ob-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('obStep' + n).classList.add('active');
+    obRenderProgress();
+    document.getElementById('obScroll').scrollTo({ top:0, behavior:'smooth' });
+  }
+  function obRenderProgress() {
+    const labels = ['Signo','Conta','Plano'];
+    document.getElementById('obProgress').innerHTML = labels.map((l, i) => {
+      const n = i + 1;
+      const cls = n < ob.step ? 'ob-done' : n === ob.step ? 'ob-active' : '';
+      return `<div class="ob-prog-step ${cls}"><div class="ob-prog-dot">${n < ob.step ? '✓' : n}</div><span class="ob-prog-lbl">${l}</span></div>`;
+    }).join('');
+  }
+  function obPickSign(id) {
+    ob.sign = byId(id);
+    document.querySelectorAll('.ob-sign-btn').forEach(b => b.classList.toggle('ob-picked', b.dataset.id === id));
+    track('sign_selected', { sign:id, mode:ob.mode });
+    obUpdateSignBtn();
+  }
+  function obUpdateSignBtn() {
+    const btn = document.getElementById('obBtn1');
+    btn.disabled = !ob.sign;
+    if (!ob.sign) { btn.textContent = 'Escolhe um signo'; return; }
+    btn.textContent = ob.mode === 'free' ? `Ver o drama de ${ob.sign.n} →` : 'Continuar';
+  }
+  function obNextFromSign() {
+    if (!ob.sign) return;
+    if (ob.mode === 'free') { goToBoletim(ob.sign); closeModal(); return; }
+    obGoStep(2);
+  }
+  function obToggleConsent() {
+    ob.consent = !ob.consent;
+    const c = document.getElementById('obConsentCheck');
+    c.classList.toggle('checked', ob.consent);
+    c.classList.remove('err');
+  }
+  function obValidateStep2() {
+    let ok = true;
+    const name = document.getElementById('obFname').value.trim();
+    document.getElementById('obErrFname').hidden = !!name; if (!name) ok = false;
+    const email = document.getElementById('obFemail').value.trim();
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.getElementById('obErrEmail').hidden = valid; if (!valid) ok = false;
+    if (!ob.consent) { document.getElementById('obConsentCheck').classList.add('err'); ok = false; }
+    if (ok) obGoStep(3);
+  }
+  function obSetPlan(plan, silent) {
+    ob.plan = plan;
+    const m = plan === 'pro_monthly';
+    document.getElementById('obPlanMonthly').classList.toggle('picked', m);
+    document.getElementById('obPlanAnnual').classList.toggle('picked', !m);
+    document.getElementById('obCoName').textContent = m ? 'Astro Drama PRO mensal' : 'Astro Drama PRO anual';
+    document.getElementById('obCoVal').textContent = m ? '1.º mês' : '12 meses';
+    document.getElementById('obCoTotal').textContent = m ? '0,99 €' : '29,99 €';
+    document.getElementById('obCoNote').textContent = m
+      ? 'Depois 3,99 €/mês, renovação automática. Cancela quando quiseres.'
+      : 'Cerca de 2,50 €/mês. Renova daqui a um ano. Cancela quando quiseres.';
+    document.getElementById('obBtnPay').textContent = m ? 'Pagar 0,99 € e desbloquear' : 'Pagar 29,99 € e desbloquear';
+    if (!silent) track('plan_selected', { plan });
+  }
+
+  // Checkout: tenta o backend (Stripe Checkout); em modo protótipo simula sucesso.
+  async function obCheckout() {
+    track('checkout_started', { plan:ob.plan, source:ob.source, sign:ob.sign && ob.sign.id });
+    document.getElementById('obBtnPay').hidden = true;
+    document.getElementById('obBtnBack').hidden = true;
+    document.getElementById('obPayLoading').hidden = false;
+    // Só ligar quando os preços novos (0,99 € / 3,99 € / 29,99 €) estiverem criados no Stripe e o backend usar o "plan" enviado.
+    const CHECKOUT_ENABLED = false;
+    if (CHECKOUT_ENABLED) try {
+      const r = await fetch(`${API}/api/checkout`, {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          plan: ob.plan, sign: ob.sign && ob.sign.id, source: ob.source,
+          name: document.getElementById('obFname').value.trim(),
+          email: document.getElementById('obFemail').value.trim(),
+        }),
+      });
+      const data = r.ok ? await r.json() : null;
+      if (data && data.url) { window.top.location.href = data.url; return; }
+    } catch (_) {}
+    // Sem checkout real: nas pré-visualizações simula o sucesso; no site público avisa que o PRO abre em breve.
+    const DEV = PREVIEW || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:';
+    setTimeout(DEV ? obShowSuccess : obShowSoon, 900);
+  }
+  function obShowSoon() {
+    track('checkout_unavailable', { plan:ob.plan, source:ob.source });
+    document.querySelectorAll('.ob-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('obProgress').hidden = true;
+    document.getElementById('obPayLoading').hidden = true;
+    document.getElementById('obSoon').hidden = false;
+  }
+  function obShowSuccess() {
+    track('checkout_completed', { plan:ob.plan, source:ob.source, prototype:true });
+    document.querySelectorAll('.ob-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('obProgress').hidden = true;
+    document.getElementById('obPayLoading').hidden = true;
+    document.getElementById('obSuccess').hidden = false;
+  }
+</script>

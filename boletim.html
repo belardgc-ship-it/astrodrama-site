@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="pt-PT">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boletim Astro Drama</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Symbols+2&display=swap">
+
+<style>
+  :root {
+    --black: #0A080F;
+    --purple: #3D1F6E;
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --cream: #F5F0E8;
+    --text: #EDE8F5;
+    --muted: #9B8FC0;
+    --card-bg: #110D1C;
+    --deep: #0D0A18;
+    --border: rgba(201,168,76,0.16);
+    --border-strong: rgba(201,168,76,0.35);
+    --lilac-line: rgba(155,143,192,0.38);
+    --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --glyph: 'Noto Sans Symbols 2', 'Segoe UI Symbol', 'Apple Symbols', serif;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  body { background: var(--black); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+  body.modal-open { overflow: hidden; }
+  button { font-family: var(--sans); }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  .page { max-width: 560px; margin: 0 auto; padding-inline: 16px; }
+
+  /* NAV */
+  nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: rgba(10,8,15,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(201,168,76,0.08); }
+  .nav-in { max-width: 560px; margin: 0 auto; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .nav-back { font-size: 13px; color: var(--muted); text-decoration: none; min-width: 64px; }
+  .nav-back:hover { color: var(--cream); }
+  .nav-logo { font-family: var(--serif); font-weight: 900; font-size: 16px; color: var(--gold); letter-spacing: 0.06em; text-decoration: none; }
+  .nav-pro { min-width: 64px; padding: 6px 11px; border-radius: 20px; border: 1px solid var(--border-strong); background: transparent; color: var(--gold-light); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; }
+  .nav-pro:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .nav-pro.is-pro { cursor: default; background: rgba(201,168,76,0.12); }
+
+  /* Barra só de pré-visualização (simular FREE/PRO) */
+  .devbar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 11px; color: var(--muted); background: #08060c; border-bottom: 1px dashed rgba(155,143,192,0.25); }
+  .devbar button { padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(155,143,192,0.35); background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
+  .devbar button.on { border-color: var(--gold); color: var(--gold-light); }
+
+  /* Sign picker */
+  .picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding-block: 14px 4px; }
+  .sp-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 2px; background: var(--card-bg); border: 1.5px solid rgba(201,168,76,0.14); border-radius: 10px; cursor: pointer; color: var(--muted); transition: border-color .15s, background .15s; min-width: 0; }
+  .sp-btn:hover { border-color: var(--border-strong); }
+  .sp-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.09); color: var(--gold-light); }
+  .sp-name { font-size: 9px; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+  /* Sign icon */
+  .sicon { position: relative; display: inline-block; flex-shrink: 0; }
+  .sicon svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .sicon .glyph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--glyph); background: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #a07820 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+
+  /* Hero = Drama */
+  .hero { position: relative; isolation: isolate; text-align: center; padding-block: 30px 0; }
+  .hero::before { content: ''; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: min(420px, 100%); height: 300px; background: radial-gradient(ellipse, rgba(61,31,110,0.45) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+  .hero-date { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); opacity: 0.85; margin-top: 12px; }
+  .hero-sign { font-family: var(--serif); font-weight: 900; font-size: 30px; color: var(--cream); line-height: 1.1; margin-top: 4px; }
+  .demo-badge { display: inline-block; margin-top: 8px; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); border: 1px dashed rgba(155,143,192,0.4); }
+
+  .drama-card { margin-top: 22px; padding: 22px 20px 18px; border-radius: 20px; background: linear-gradient(155deg, #22123F 0%, #110D1C 60%, #160E28 100%); border: 1.5px solid rgba(201,168,76,0.32); text-align: center; position: relative; overflow: hidden; }
+  .block-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .score-big { font-family: var(--serif); font-weight: 900; font-size: 84px; line-height: 1; margin-top: 6px; background: linear-gradient(135deg, #E8C96A 0%, #C9A84C 50%, #a07820 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-variant-numeric: tabular-nums; }
+  .score-den { font-family: var(--serif); font-size: 24px; color: var(--muted); }
+  .bar { width: 160px; max-width: 70%; height: 4px; margin: 12px auto 0; border-radius: 4px; background: rgba(201,168,76,0.12); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, #a07820, #E8C96A); transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .tag { display: inline-block; margin-top: 14px; padding: 5px 13px; border-radius: 30px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--gold-light); }
+  .drama-text { font-family: var(--serif); font-style: italic; font-size: 18px; line-height: 1.55; color: var(--cream); margin-top: 14px; text-wrap: pretty; }
+
+  /* Blocos */
+  .blocks { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+  .block { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px 18px 14px; }
+  .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .block-score { font-family: var(--serif); font-weight: 900; font-size: 26px; color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+  .block-score small { font-size: 13px; color: var(--muted); font-family: var(--sans); font-weight: 500; }
+  .block-text { font-size: 15px; color: rgba(237,232,245,0.88); line-height: 1.65; margin-top: 10px; }
+  .stat-val { font-family: var(--serif); font-weight: 900; font-size: 48px; line-height: 1; color: var(--gold); margin-top: 10px; font-variant-numeric: tabular-nums; }
+  .quote { font-family: var(--serif); font-style: italic; font-weight: 700; font-size: 24px; line-height: 1.32; color: var(--cream); margin-top: 14px; text-wrap: balance; }
+  .quote-by { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .block.frase { padding: 24px 20px 16px; background: linear-gradient(160deg, #3D1F6E 0%, #150C28 80%); border-color: rgba(201,168,76,0.3); box-shadow: 0 24px 50px -30px rgba(61,31,110,0.9); }
+  .block-foot { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(201,168,76,0.3); background: rgba(0,0,0,0.25); color: var(--gold-light); font-size: 12px; font-weight: 600; cursor: pointer; }
+  .share-btn:hover { background: var(--gold); color: var(--black); border-color: var(--gold); }
+  .drama-card .block-foot { justify-content: center; }
+
+  /* Teasers PRO (intercalados) */
+  .block.teaser { background: linear-gradient(160deg, rgba(61,31,110,0.42) 0%, var(--card-bg) 75%); border-color: var(--lilac-line); }
+  .pro-chip { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; padding: 3px 7px; border-radius: 10px; color: var(--gold-light); border: 1px solid rgba(201,168,76,0.35); white-space: nowrap; }
+  .watch-sign { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .watch-name { font-family: var(--serif); font-weight: 900; font-size: 28px; color: var(--cream); letter-spacing: 0.04em; line-height: 1; }
+  .teaser-line { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; color: var(--cream); margin-top: 12px; }
+  .alert-time { font-family: var(--serif); font-weight: 900; font-size: 30px; color: var(--cream); margin-top: 12px; line-height: 1.1; }
+  .lock-q { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(155,143,192,0.25); font-size: 14px; font-weight: 600; color: var(--muted); }
+  .redacted { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+  .redacted i { display: block; height: 11px; border-radius: 4px; background: linear-gradient(90deg, rgba(155,143,192,0.42), rgba(155,143,192,0.22)); filter: blur(1.4px); }
+  .teaser-cta { width: 100%; margin-top: 14px; padding: 13px 14px; border-radius: 11px; border: none; background: var(--gold); color: var(--black); font-size: 14px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; transition: background .15s; }
+  .teaser-cta:hover { background: var(--gold-light); }
+  .pro-text { font-size: 15px; color: rgba(237,232,245,0.9); line-height: 1.65; margin-top: 12px; }
+
+  /* Progresso + CTA final */
+  .final { margin-top: 22px; padding: 24px 20px 20px; border-radius: 20px; text-align: center; background: linear-gradient(165deg, #2A1550 0%, #120C22 70%); border: 1.5px solid rgba(201,168,76,0.4); }
+  .final-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: var(--gold-light); }
+  .dots { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin: 14px 0 8px; }
+  .dots span { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgba(201,168,76,0.55); }
+  .dots span.on { background: var(--gold); border-color: var(--gold); }
+  .final-count { font-size: 13px; color: var(--muted); }
+  .final-title { font-family: var(--serif); font-weight: 900; font-size: 26px; color: var(--cream); line-height: 1.15; margin-top: 18px; text-wrap: balance; }
+  .final-sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .final-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0 18px; text-align: left; }
+  .final-list li { font-size: 13px; color: var(--text); padding: 9px 10px; border-radius: 10px; background: rgba(0,0,0,0.25); border: 1px solid rgba(155,143,192,0.2); }
+  .price-big { font-family: var(--serif); font-weight: 900; font-size: 22px; color: var(--gold-light); letter-spacing: 0.02em; }
+  .price-fine { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .cta-strong { width: 100%; margin-top: 12px; padding: 16px; border-radius: 12px; border: none; background: var(--gold); color: var(--black); font-size: 15px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; }
+  .cta-strong:hover { background: var(--gold-light); }
+
+  /* WhatsApp / regresso */
+  .channel { margin-top: 22px; padding: 22px 20px; border-radius: 18px; background: var(--card-bg); border: 1px solid var(--border); text-align: center; }
+  .channel-title { font-family: var(--serif); font-weight: 900; font-size: 22px; line-height: 1.2; color: var(--cream); }
+  .channel-title em { color: var(--gold); }
+  .channel-txt { font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .channel-txt .g { font-family: var(--glyph); color: var(--gold); }
+  .channel-btn { display: inline-block; margin-top: 14px; padding: 12px 18px; border-radius: 11px; border: 1.5px solid var(--border-strong); background: transparent; color: var(--cream); font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-decoration: none; }
+  .channel-btn:hover { border-color: var(--gold); }
+  .channel-fine { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  footer { text-align: center; padding-block: 28px calc(36px + env(safe-area-inset-bottom, 0px)); font-size: 12px; color: var(--muted); line-height: 1.6; text-wrap: balance; }
+  footer strong { color: var(--text); font-weight: 600; }
+
+  /* Paywall contextual (bottom sheet) */
+  .pw { position: fixed; inset: 0; z-index: 300; display: flex; align-items: flex-end; justify-content: center; background: rgba(10,8,15,0.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .pw.open { opacity: 1; pointer-events: auto; }
+  .pw-sheet { position: relative; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; background: linear-gradient(170deg, #1E1038 0%, #110D1C 55%); border: 1.5px solid rgba(201,168,76,0.3); border-bottom: none; border-radius: 22px 22px 0 0; padding: 26px 20px calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateY(100%); transition: transform .3s cubic-bezier(.32,.72,0,1); }
+  .pw.open .pw-sheet { transform: translateY(0); }
+  .pw-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.07); color: var(--muted); font-size: 16px; cursor: pointer; }
+  .pw-close:hover { color: var(--cream); background: rgba(255,255,255,0.14); }
+  .pw-hook { font-family: var(--serif); font-weight: 900; font-size: 23px; line-height: 1.25; color: var(--cream); padding-right: 36px; text-wrap: balance; }
+  .pw-brand { margin-top: 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: var(--gold); }
+  .pw-brand-sub { font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .pw-box { margin-top: 16px; padding: 14px; border-radius: 14px; background: rgba(0,0,0,0.28); border: 1px solid rgba(155,143,192,0.22); }
+  .pw-box-title { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: var(--gold-light); }
+  .pw-box-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .pw-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .pw-list li { font-size: 14px; color: var(--text); }
+  .pw-list li.hl { color: var(--gold-light); font-weight: 600; }
+  .pw-extra { font-size: 12px; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(155,143,192,0.22); line-height: 1.5; }
+  .pw-price { text-align: center; margin-top: 18px; }
+  .pw-later { display: block; margin: 10px auto 0; background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 6px; }
+  .pw-later:hover { color: var(--cream); }
+
+  /* Toast (depois de partilhar) */
+  .toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 140%); visibility: hidden; z-index: 200; width: min(440px, calc(100% - 32px)); background: #1A1030; border: 1.5px solid rgba(201,168,76,0.4); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); transition: transform .3s cubic-bezier(.32,.72,0,1), visibility .3s; }
+  .toast.show { transform: translate(-50%, 0); visibility: visible; }
+  .toast-txt { flex: 1; font-size: 13px; line-height: 1.45; }
+  .toast-txt strong { color: var(--cream); display: block; }
+  .toast-btn { padding: 9px 12px; border-radius: 9px; border: none; background: var(--gold); color: var(--black); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .toast-x { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; }
+
+  /* Loading */
+  .loading { display: flex; flex-direction: column; align-items: center; gap: 14px; padding-block: 80px; color: var(--muted); font-size: 14px; }
+  .spinner { width: 30px; height: 30px; border: 2px solid rgba(201,168,76,0.15); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 380px) {
+    .picker { grid-template-columns: repeat(4, 1fr); }
+    .score-big { font-size: 72px; }
+    .final-list { grid-template-columns: 1fr; }
+    .quote { font-size: 21px; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="goldGradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#E8C96A"/>
+    <stop offset="50%" stop-color="#C9A84C"/>
+    <stop offset="100%" stop-color="#a07820"/>
+  </linearGradient>
+</defs></svg>
+
+<nav>
+  <div class="nav-in">
+    <a class="nav-back" id="navBack" href="index.html">← Início</a>
+    <a class="nav-logo" id="navLogo" href="index.html">ASTRODRAMA</a>
+    <button class="nav-pro" id="navPro" onclick="onTeaserClick('header')">PRO ✦</button>
+  </div>
+  <div class="devbar" id="devbar" hidden>
+    Pré-visualização:
+    <button id="devFree" onclick="setDevPlan('free')">Ver como FREE</button>
+    <button id="devPro" onclick="setDevPlan('pro')">Ver como PRO</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="picker" id="picker" role="group" aria-label="Escolher signo"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>A consultar os astros…</div>
+  </div>
+
+  <main id="content" hidden>
+    <!-- 1. DRAMA (FREE) -->
+    <section class="hero" aria-labelledby="heroSign">
+      <span id="heroIcon"></span>
+      <p class="hero-date" id="heroDate">Boletim de hoje</p>
+      <h1 class="hero-sign" id="heroSign">—</h1>
+      <span class="demo-badge" id="demoBadge" hidden title="O gerador ainda não devolve todos os blocos novos.">Conteúdo de exemplo</span>
+
+      <div class="drama-card">
+        <p class="block-lbl">Drama</p>
+        <div><span class="score-big" id="dramaScore">—</span><span class="score-den">/10</span></div>
+        <div class="bar"><i id="dramaBar"></i></div>
+        <span class="tag" id="dramaTag">—</span>
+        <p class="drama-text" id="dramaText"></p>
+        <div class="block-foot"><button class="share-btn" onclick="share('drama')">↗ Partilhar</button></div>
+      </div>
+    </section>
+
+    <div class="blocks">
+      <!-- 2. AMOR (FREE) -->
+      <article class="block">
+        <div class="block-head">
+          <span class="block-lbl">Amor</span>
+          <span class="block-score" id="amorScore">—<small>/10</small></span>
+        </div>
+        <p class="block-text" id="amorText"></p>
+        <div class="block-foot"><button class="share-btn" onclick="share('amor')">↗ Partilhar</button></div>
+      </article>
+
+      <!-- 3. PESSOA A OBSERVAR (PRO teaser: signo grátis, explicação PRO) -->
+      <article class="block teaser" id="tPessoa" data-teaser="person_to_watch">
+        <div class="block-head">
+          <span class="block-lbl">Pessoa a observar</span>
+          <span class="pro-chip" data-pro-only>✦ PRO</span>
+        </div>
+        <div class="watch-sign">
+          <span id="pessoaIcon"></span>
+          <span class="watch-name" id="pessoaName">—</span>
+        </div>
+        <div data-free-only>
+          <p class="teaser-line">Hoje este signo pode ter mais importância no teu drama do que estás à espera.</p>
+          <p class="lock-q"><span id="pessoaQ">Porque é que este signo apareceu aqui?</span></p>
+          <button class="teaser-cta" onclick="onTeaserClick('person_to_watch')">DESCOBRIR</button>
+        </div>
+        <p class="pro-text" id="pessoaPro" data-pro-only></p>
+      </article>
+
+      <!-- 4. ESTATÍSTICA (FREE) -->
+      <article class="block">
+        <span class="block-lbl">Estatística completamente necessária</span>
+        <div class="stat-val" id="statVal">—</div>
+        <p class="block-text" id="statText" style="margin-top:6px"></p>
+        <div class="block-foot"><button class="share-btn" onclick="share('estatistica')">↗ Partilhar</button></div>
+      </article>
+
+      <!-- 5. QUÍMICA (PRO teaser: nota grátis, explicação PRO) -->
+      <article class="block teaser" id="tQuimica" data-teaser="chemistry">
+        <div class="block-head">
+          <span class="block-lbl">Química</span>
+          <span class="block-score" id="quimicaScore">—<small>/10</small></span>
+        </div>
+        <div data-free-only>
+          <p class="teaser-line" id="quimicaTeaser"></p>
+          <p class="lock-q"><span id="quimicaQ">Porque está assim hoje?</span></p>
+          <button class="teaser-cta" onclick="onTeaserClick('chemistry')">VER PORQUÊ</button>
+        </div>
+        <p class="pro-text" id="quimicaPro" data-pro-only></p>
+      </article>
+
+      <!-- 6. FOSTE APANHADO/A (FREE) -->
+      <article class="block">
+        <span class="block-lbl">Foste apanhado/a</span>
+        <p class="block-text" id="apanhadoText"></p>
+        <div class="block-foot"><button class="share-btn" onclick="share('foste_apanhado')">↗ Partilhar</button></div>
+      </article>
+
+      <!-- 7. ALERTA DO DIA (PRO teaser: hora grátis, aviso PRO) -->
+      <article class="block teaser" id="tAlerta" data-teaser="daily_alert">
+        <div class="block-head">
+          <span class="block-lbl">Alerta do dia</span>
+          <span class="pro-chip" data-pro-only>✦ PRO</span>
+        </div>
+        <p class="alert-time" id="alertaHora">Depois das —…</p>
+        <div data-free-only>
+          <div class="redacted" aria-label="Aviso escondido"><i style="width:92%"></i><i style="width:70%"></i></div>
+          <p class="lock-q">O que acontece a seguir fica para quem quiser saber.</p>
+          <button class="teaser-cta" onclick="onTeaserClick('daily_alert')">VER O ALERTA</button>
+        </div>
+        <p class="pro-text" id="alertaPro" data-pro-only></p>
+      </article>
+
+      <!-- 8. FRASE DO DIA (FREE) -->
+      <article class="block frase">
+        <span class="block-lbl" style="color:var(--gold-light)">Frase do dia</span>
+        <p class="quote" id="fraseText"></p>
+        <p class="quote-by" id="fraseBy"></p>
+        <div class="block-foot"><button class="share-btn" onclick="share('frase_do_dia')">↗ Partilhar</button></div>
+      </article>
+
+      <!-- 9. AMANHÃ (PRO teaser) -->
+      <article class="block teaser" id="tAmanha" data-teaser="tomorrow">
+        <div class="block-head">
+          <span class="block-lbl">Amanhã</span>
+          <span class="pro-chip" data-pro-only>✦ PRO</span>
+        </div>
+        <div data-free-only>
+          <p class="teaser-line">Há qualquer coisa que provavelmente vais querer saber antes de acordares.</p>
+          <div class="redacted" aria-label="Previsão escondida"><i style="width:85%"></i><i style="width:60%"></i></div>
+          <p class="lock-q">Amanhã já está escrito. Só ainda não o leste.</p>
+          <button class="teaser-cta" onclick="onTeaserClick('tomorrow')">ESPREITAR AMANHÃ</button>
+        </div>
+        <p class="pro-text" id="amanhaPro" data-pro-only></p>
+      </article>
+    </div>
+
+    <!-- 10. PROGRESSO + CTA FINAL (só FREE) -->
+    <section class="final" id="finalCta" data-free-only data-teaser="final_cta" aria-labelledby="finalTitle">
+      <p class="final-eyebrow">O TEU DRAMA AINDA NÃO ACABOU</p>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <p class="final-count" id="finalCount"></p>
+      <h2 class="final-title" id="finalTitle">Ainda te faltam revelações</h2>
+      <p class="final-sub">O resto do teu drama já está pronto.</p>
+      <ul class="final-list" id="finalList"></ul>
+      <p class="price-big">€0,99 NO PRIMEIRO MÊS</p>
+      <button class="cta-strong" onclick="onTeaserClick('final_cta')">DESBLOQUEAR O MEU DRAMA</button>
+      <p class="price-fine">Depois €3,99/mês · Cancela quando quiseres.</p>
+    </section>
+
+    <!-- 11. WHATSAPP / REGRESSO AMANHÃ -->
+    <aside class="channel">
+      <p class="channel-title">Amanhã há mais drama.<br><em>Obviamente.</em></p>
+      <p class="channel-txt"><span class="g" id="chGlyph">♏︎</span> <span id="chSign">Escorpião</span> recebe um novo boletim todos os dias às 07:00.</p>
+      <a class="channel-btn" id="channelLink" href="#" target="_blank" rel="noopener" onclick="track('channel_click',{sign:current})">SEGUIR NO WHATSAPP</a>
+      <p class="channel-fine">É grátis e não precisamos do teu número.</p>
+    </aside>
+  </main>
+
+  <footer>
+    <strong>ASTRODRAMA é entretenimento.</strong><br>
+    Os astros recusam qualquer responsabilidade pelas mensagens que decidires enviar depois das 23:00.
+  </footer>
+</div>
+
+<!-- Paywall contextual -->
+<div class="pw" id="pw" onclick="if(event.target===this)closePaywall('backdrop')">
+  <div class="pw-sheet" role="dialog" aria-modal="true" aria-labelledby="pwHook">
+    <button class="pw-close" onclick="closePaywall('x')" aria-label="Fechar">✕</button>
+    <p class="pw-hook" id="pwHook"></p>
+    <p class="pw-brand">ASTRODRAMA PRO</p>
+    <p class="pw-brand-sub">Desbloqueia o teu boletim completo.</p>
+    <div class="pw-box">
+      <p class="pw-box-title">O RESTO DO TEU DRAMA ESTÁ PRONTO</p>
+      <p class="pw-box-sub">Hoje ainda tens por descobrir:</p>
+      <ul class="pw-list" id="pwList"></ul>
+      <p class="pw-extra">E todos os dias: previsão da semana e do mês, até 10 pessoas Debaixo de Olho e O Nosso Drama sem limites.</p>
+    </div>
+    <div class="pw-price">
+      <p class="price-big">€0,99 no primeiro mês</p>
+      <button class="cta-strong" id="pwCta" onclick="startCheckout()">DESBLOQUEAR O MEU DRAMA</button>
+      <p class="price-fine">Depois €3,99/mês · Cancela quando quiseres.</p>
+    </div>
+    <button class="pw-later" onclick="closePaywall('later')">Agora não</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <div class="toast-txt" id="toastTxt"></div>
+  <button class="toast-btn" id="toastBtn" onclick="hideToast(); onTeaserClick('after_share')">Espreitar o resto</button>
+  <button class="toast-x" onclick="hideToast()" aria-label="Fechar">✕</button>
+</div>
+
+<script>
+  /* ---------- Configuração ---------- */
+  const API = 'https://astrodrama-backend-production-d856.up.railway.app';
+  const WHATSAPP_CHANNEL_URL = '#'; // TODO: link do Canal de WhatsApp quando estiver criado
+
+  // No domínio próprio as páginas ligam-se por links normais.
+  // Nas pré-visualizações (claude.ai) usam os links dos artifacts.
+  const PREVIEW = /claude|anthropic|usercontent/i.test(location.hostname);
+  const DEV = PREVIEW || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:';
+  const PAGES = PREVIEW
+    ? { index: 'https://claude.ai/artifact/WRwi8RvsWqzCJCPnQ882Jw', boletim: 'https://claude.ai/artifact/Erh751XZhSEVh9jCTZTcuT' }
+    : { index: 'index.html', boletim: 'boletim.html' };
+  function pageURL(page, params) {
+    const q = params ? '?' + new URLSearchParams(params).toString() : '';
+    return PAGES[page] + q;
+  }
+  function navigate(url) {
+    const a = document.createElement('a');
+    a.href = url; if (PREVIEW) a.target = '_top';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  /* ---------- Métricas ----------
+     Eventos para o funil FREE → PRO. Hoje vão para window.dataLayer;
+     para ligar a um serviço de analytics ou a /api/events, só é preciso mudar track(). */
+  window.dataLayer = window.dataLayer || [];
+  function track(event, props = {}) {
+    const e = { event, ...props, page: 'boletim', plan: ent.plan, ts: new Date().toISOString() };
+    window.dataLayer.push(e);
+    try { console.debug('[track]', e); } catch (_) {}
+  }
+
+  /* ---------- Entitlements (FREE / PRO) ----------
+     TODO quando a subscrição estiver ligada: substituir por GET /api/me com a sessão do utilizador,
+     e o backend só devolve os textos PRO a quem tiver PRO. A página nunca decide isto só por CSS. */
+  let ent = { plan: 'free', mock: false };
+  async function loadEntitlement() {
+    if (DEV) {
+      const q = new URLSearchParams(location.search).get('estado');
+      let saved = null; try { saved = sessionStorage.getItem('ad_dev_plan'); } catch (_) {}
+      const plan = q === 'pro' || q === 'free' ? q : saved;
+      if (plan === 'pro') return { plan: 'pro', mock: true };
+    }
+    return { plan: 'free', mock: false };
+  }
+  const isPro = () => ent.plan === 'pro';
+
+  /* ---------- Signos ---------- */
+  const SIGNS = {
+    aries:       { n: 'Carneiro',    g: '♈︎' },
+    taurus:      { n: 'Touro',       g: '♉︎' },
+    gemini:      { n: 'Gémeos',      g: '♊︎' },
+    cancer:      { n: 'Caranguejo',  g: '♋︎' },
+    leo:         { n: 'Leão',        g: '♌︎' },
+    virgo:       { n: 'Virgem',      g: '♍︎' },
+    libra:       { n: 'Balança',     g: '♎︎' },
+    scorpio:     { n: 'Escorpião',   g: '♏︎' },
+    sagittarius: { n: 'Sagitário',   g: '♐︎' },
+    capricorn:   { n: 'Capricórnio', g: '♑︎' },
+    aquarius:    { n: 'Aquário',     g: '♒︎' },
+    pisces:      { n: 'Peixes',      g: '♓︎' },
+  };
+  const strip = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const NAME_TO_ID = Object.fromEntries(Object.entries(SIGNS).map(([id, s]) => [strip(s.n), id]));
+  NAME_TO_ID['aries'] = 'aries';
+  const signIdFrom = v => SIGNS[v] ? v : NAME_TO_ID[strip(v)];
+  const fmt = n => Number(n).toFixed(1).replace('.', ',');
+
+  function iconHTML(id, size) {
+    const r = size / 2 - 2;
+    return `<span class="sicon" style="width:${size}px;height:${size}px">
+      <svg viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="url(#goldGradMain)" stroke-width="1.5"/></svg>
+      <span class="glyph" style="font-size:${Math.round(size * 0.42)}px">${SIGNS[id].g}</span>
+    </span>`;
+  }
+
+  /* ---------- Conteúdo de exemplo (enquanto o gerador não devolve a estrutura nova) ----------
+     Campos PRO (pessoaTxt, quimica[1], alertaTxt, amanha) só são usados no estado PRO simulado. */
+  const DEMO = {
+    aries:       { drama:[8.7,'PAVIO CURTO, AGENDA CHEIA','Vais começar três coisas antes das dez e acabar uma. A que acabares vai ser uma discussão.'], amor:[6.1,'Tens pressa de uma resposta que a outra pessoa ainda nem percebeu que era pergunta.'], stat:['4 seg','é quanto aguentas numa fila antes de suspirar alto. Hoje vai ser 3.'], apanhado:'A buzinar mentalmente a quem vai à tua frente no passeio.', frase:['Não sou impaciente. O mundo é que é lento.','— Carneiro, às 8h03'],
+      pessoa:'taurus', pessoaTxt:'A calma de um Touro hoje vai parecer-te provocação. Não é. Respira antes de responder.', quimica:[8.3,'Marte deixa-te magnético/a e sem filtro. A combinação é perigosa num grupo de WhatsApp.'], alerta:'11:20', alertaTxt:'Não respondas a nada com «como queiras». Toda a gente sabe o que isso quer dizer.', amanha:'Amanhã alguém vai dar-te razão. Aproveita, que não se repete tão cedo.' },
+    taurus:      { drama:[3.2,'MODO SOFÁ ATIVADO','Hoje nada te tira do sério. Exceto alguém mexer na tua comida. Aí é guerra.'], amor:[7.4,'Mostras carinho como sempre: a perguntar se a pessoa já comeu.'], stat:['73%','das tuas decisões de hoje vão depender do que há para o jantar.'], apanhado:'A dizer «só mais cinco minutos» pela quarta vez. Na cama. Às 11h.', frase:['Mudar de planos? Já mudei uma vez em 2019.','— Touro, sem pressa'],
+      pessoa:'leo', pessoaTxt:'Um Leão vai querer protagonismo num plano que era teu. Deixa-o falar. Tu ficas com a última palavra.', quimica:[6.2,'Química morna, mas estável. Como um bom guisado: demora, mas compensa.'], alerta:'19:15', alertaTxt:'Não prometas jantar a ninguém antes de veres o que há no frigorífico.', amanha:'Amanhã alguém vai tentar mudar-te os planos. Vais ganhar. Calmamente.' },
+    gemini:      { drama:[7.1,'DUAS OPINIÕES, ZERO DECISÕES','Vais defender uma ideia de manhã e o contrário à tarde. Com a mesma convicção. E vais ter razão nas duas.'], amor:[5.8,'Escreves uma mensagem longa, apagas e mandas «haha». Clássico.'], stat:['17','separadores abertos no browser. Um deles tem música e não sabes qual.'], apanhado:'A ensaiar no duche uma discussão que nunca vai acontecer. E a ganhar.', frase:['Não mudo de ideias. Faço atualizações.','— Gémeos, versão 4.2'],
+      pessoa:'virgo', pessoaTxt:'Um Virgem vai reparar numa contradição tua. Vais ter duas explicações. Escolhe uma, só uma.', quimica:[7.7,'A tua conversa está afiada. Alguém vai achar graça a mais do que esperavas.'], alerta:'16:40', alertaTxt:'Não comeces uma frase com «já agora». Vais abrir um tema que não consegues fechar.', amanha:'Amanhã vais ter uma ideia brilhante às 23h. Escreve-a antes que mudes de ideias.' },
+    cancer:      { drama:[9.3,'MEMÓRIA DE ELEFANTE','Vais lembrar-te de uma coisa que alguém disse em 2019. Com data, hora e tom de voz.'], amor:[8.2,'Queres colo mas dizes que está tudo bem. Não está. Toda a gente sabe.'], stat:['3','vezes que vais ver fotos antigas hoje. Duas vão acabar em suspiro.'], apanhado:'A ficar ofendido/a com uma mensagem que ainda nem leste até ao fim.', frase:['Eu perdoo. Só não esqueço. Nem arquivo.','— Caranguejo, emocionalmente disponível'],
+      pessoa:'aquarius', pessoaTxt:'Um Aquário vai parecer distante. Não é contigo, está só noutro planeta. Não leves a peito.', quimica:[8.9,'Estás irresistivelmente sensível hoje. Há quem ache isso encantador. Há quem fuja.'], alerta:'21:30', alertaTxt:'Não abras conversas antigas. Sabes quais. Essas.', amanha:'Amanhã alguém vai pedir-te desculpa. Não da forma que querias, mas vai.' },
+    leo:         { drama:[6.8,'PALCO OBRIGATÓRIO','Precisas de um elogio até às 11h. Se não vier, vais fazer por merecê-lo. Alto.'], amor:[7.0,'A pessoa olhou para ti. Pelo menos foi isso que decidiste.'], stat:['12','selfies tiradas para escolher uma. A primeira era a melhor.'], apanhado:'A ver quem viu o teu story. Duas vezes.', frase:['Não estou a exagerar. Estou a narrar com intensidade.','— Leão, em palco'],
+      pessoa:'scorpio', pessoaTxt:'Um Escorpião vai observar-te mais do que comentar. Se não disser nada, é porque reparou em tudo.', quimica:[9.1,'O Sol está do teu lado e tu sabes. A confiança de hoje vale por três cafés.'], alerta:'13:05', alertaTxt:'Não peças opinião sobre uma coisa que já decidiste. Vão dar-ta.', amanha:'Amanhã vais receber um elogio inesperado. Tenta parecer surpreendido/a.' },
+    virgo:       { drama:[4.4,'CORRETOR AUTOMÁTICO HUMANO','Vais reparar no erro que ninguém viu. E vais dizer. Com carinho. Mas vais dizer.'], amor:[5.2,'Gostas da pessoa, mas já fizeste uma lista de pontos a melhorar.'], stat:['87%','das listas que fizeste hoje têm uma sub-lista. Uma delas tem anexos.'], apanhado:'A reorganizar a gaveta dos talheres de outra pessoa. Sem autorização.', frase:['Não sou picuinhas. Sou detalhadamente certo.','— Virgem, revisto e aprovado'],
+      pessoa:'sagittarius', pessoaTxt:'Um Sagitário vai propor um plano sem detalhes nenhuns. Vais sofrer. Vai correr bem na mesma.', quimica:[5.4,'Química dentro dos parâmetros. Sim, mediste.'], alerta:'10:10', alertaTxt:'Não corrijas a gramática de ninguém num grupo. Hoje não. Por favor.', amanha:'Amanhã o plano sai à primeira. Vais desconfiar. Não desconfies.' },
+    libra:       { drama:[5.5,'INDECISÃO PREMIUM','Vais demorar 25 minutos a escolher um restaurante. Vais acabar no do costume. Foi a escolha certa.'], amor:[7.8,'Estás encantador/a hoje. O problema é que estás encantador/a com toda a gente.'], stat:['25 min','para escolher onde jantar. Mais 10 para escolher o prato.'], apanhado:'A concordar com as duas pessoas de uma discussão. Ao mesmo tempo.', frase:['Não sou indeciso. Talvez. Não sei. Tu achas?','— Balança, em equilíbrio precário'],
+      pessoa:'aries', pessoaTxt:'Um Carneiro vai pedir-te uma decisão rápida. Rápida para ti são dois dias. Negocia.', quimica:[8.6,'Vénus está a trabalhar para ti. O teu charme hoje dava para iluminar uma rua.'], alerta:'18:25', alertaTxt:'Não digas «tanto faz» quando não faz. Vais ficar com o que não querias.', amanha:'Amanhã vais ter de escolher entre duas coisas boas. Que sofrimento tão bonito.' },
+    scorpio:     { drama:[8.8,'NÃO PODEMOS FAZER NADA','Plutão acordou desconfiado e tu também. Vais reler uma mensagem antiga três vezes e encontrar um sentido novo em cada uma.'], amor:[6.4,'Alguém quer falar contigo. Tu queres que essa pessoa adivinhe.'], stat:['91%','dos Escorpiões vai dizer «não estou chateado» hoje. Os outros 9% nem isso.'], apanhado:'A ver os stories de quem «já não te interessa». Às 01:12.', frase:['Eu não guardo rancor. Arquivo-o por ordem alfabética.','— Escorpião, sem mais comentários'],
+      pessoa:'gemini', pessoaTxt:'Um Gémeos vai dizer uma coisa a brincar que tu vais levar a sério. Antes de investigar, pergunta.', quimica:[9.1,'Estás com aquela intensidade que deixa as pessoas sem saber se devem aproximar-se ou fugir. Ambas são reações válidas.'], alerta:'22:47', alertaTxt:'Não abras o perfil de quem disseste que já tinhas esquecido. Os astros estão a ver. E tu também.', amanha:'Amanhã uma conversa que deixaste a meio volta a aparecer. Desta vez quem começa não és tu.' },
+    sagittarius: { drama:[5.9,'PASSAPORTE MENTAL','Vais planear uma viagem que não vais fazer. Deixa. É terapêutico.'], amor:[6.6,'Dizes o que pensas. A pessoa ainda está a processar a frase de ontem.'], stat:['6','destinos pesquisados hoje. Orçamento: o de um jantar.'], apanhado:'A dizer «isto vai ser rápido» antes de uma história de 40 minutos.', frase:['Não fujo dos problemas. Viajo para longe deles.','— Sagitário, em trânsito'],
+      pessoa:'pisces', pessoaTxt:'Um Peixes vai levar a sério uma piada tua. Pede desculpa com um meme. Funciona.', quimica:[7.2,'O teu entusiasmo é contagiante. Cuidado com quem apanha o vírus.'], alerta:'15:50', alertaTxt:'Não compres bilhetes de avião depois das 15:50. Nem «só para ver preços».', amanha:'Amanhã aparece um convite inesperado. Diz que sim antes de pensares demasiado.' },
+    capricorn:   { drama:[2.8,'EXCEL EMOCIONAL','Tens tudo sob controlo, incluindo coisas que não são tuas. Ninguém te pediu, mas obrigado.'], amor:[4.9,'Marcaste um momento romântico no calendário. Com lembrete. Duas vezes.'], stat:['7h02','hora a que respondeste a um email de trabalho. Num domingo.'], apanhado:'A dizer «não estou cansado/a» com olheiras até ao queixo.', frase:['Relaxar está na agenda. Para 2031.','— Capricórnio, em reunião'],
+      pessoa:'cancer', pessoaTxt:'Um Caranguejo vai precisar de mais atenção do que pede. Cinco minutos teus valem por uma hora.', quimica:[4.1,'Química em modo poupança de energia. Não é falta de interesse, é excesso de reuniões.'], alerta:'09:30', alertaTxt:'Não aceites mais uma tarefa «rapidinha». Não existem tarefas rapidinhas.', amanha:'Amanhã alguém reconhece o teu trabalho. Em público. Prepara a cara de quem não estava à espera.' },
+    aquarius:    { drama:[6.3,'LIGEIRAMENTE NOUTRO PLANETA','Vais responder a uma mensagem de terça-feira como se fosse a coisa mais normal do mundo. Para ti é.'], amor:[5.5,'Gostas da pessoa. Só não queres que isso se note. Está a notar-se.'], stat:['0','vezes que vais fazer o que toda a gente espera. Faz parte do charme.'], apanhado:'A explicar uma teoria às 2h da manhã a quem só queria dormir.', frase:['Não sou estranho. Sou uma edição limitada.','— Aquário, versão beta'],
+      pessoa:'libra', pessoaTxt:'Um Balança vai tentar que toda a gente concorde. Tu vais discordar só para ver o que acontece.', quimica:[7.9,'A tua estranheza hoje está irresistível. Há quem esteja a tentar decifrar-te.'], alerta:'23:10', alertaTxt:'Não mandes aquele áudio de quatro minutos. Escreve. Ou melhor: dorme.', amanha:'Amanhã uma ideia tua que parecia maluca começa a fazer sentido para os outros.' },
+    pisces:      { drama:[9.1,'CHORAR É UM PLANO','Viste um vídeo de um cão a reencontrar o dono. O dia acabou aí. Os outros planos ficam para amanhã.'], amor:[8.6,'Já imaginaste o casamento inteiro. A pessoa ainda não sabe o teu apelido.'], stat:['4','vezes que te vais emocionar com coisas que não têm nada a ver contigo.'], apanhado:'A dar nome a uma planta e a pedir-lhe desculpa por te esqueceres de a regar.', frase:['Não estou triste. Estou a sentir em HD.','— Peixes, em modo poético'],
+      pessoa:'capricorn', pessoaTxt:'Um Capricórnio vai trazer-te de volta à Terra. Não gostes muito, mas agradece.', quimica:[8.4,'Estás em modo romance de filme. A banda sonora é toda tua.'], alerta:'20:20', alertaTxt:'Não vejas filmes tristes depois das 20:20. Sabes como isto acaba.', amanha:'Amanhã alguém vai surpreender-te com um gesto pequeno. Vais guardá-lo durante anos.' },
+  };
+
+  /* ---------- Normalizar resposta da API ----------
+     Aceita a estrutura nova (drama/amor/estatistica/...) e a antiga (drama_score/love/...).
+     Os textos PRO só são lidos se o utilizador tiver PRO; o backend também deve recusá-los a FREE. */
+  function normalize(api, id) {
+    const d = DEMO[id];
+    const out = {
+      dramaScore: d.drama[0], dramaTag: d.drama[1], dramaText: d.drama[2],
+      amorScore: d.amor[0], amorText: d.amor[1],
+      statVal: d.stat[0], statText: d.stat[1],
+      apanhado: d.apanhado, frase: d.frase[0], fraseBy: d.frase[1],
+      pessoaSign: d.pessoa, quimicaScore: d.quimica[0], alertaHora: d.alerta, hasAmanha: true,
+      pro: isPro() && ent.mock ? { pessoa: d.pessoaTxt, quimica: d.quimica[1], alerta: d.alertaTxt, amanha: d.amanha } : null,
+      demo: true,
+    };
+    if (!api || api.error) return out;
+
+    const pick = (...vals) => vals.find(v => v !== undefined && v !== null && v !== '');
+    const drama = api.drama || {}, amor = api.amor || {}, est = api.estatistica || {};
+    const fr = api.frase_do_dia || {}, qu = api.quimica || {}, pe = api.pessoa_a_observar || {}, al = api.alerta_do_dia || {}, am = api.amanha || {};
+    const realScore = pick(drama.nota, drama.score, api.drama_score);
+    if (realScore === undefined) return out;
+
+    out.dramaScore = Number(realScore);
+    out.dramaTag   = pick(drama.etiqueta, drama.label, api.drama_label, out.dramaTag);
+    out.dramaText  = pick(drama.texto, drama.text, api.headline, api.general, out.dramaText);
+    out.amorScore  = Number(pick(amor.nota, amor.score, api.love_score, out.amorScore));
+    out.amorText   = pick(amor.texto, amor.text, typeof api.love === 'string' ? api.love : undefined, out.amorText);
+    out.statVal    = pick(est.valor, est.value, out.statVal);
+    out.statText   = pick(est.texto, est.text, out.statText);
+    out.apanhado   = pick(api.foste_apanhado && (api.foste_apanhado.texto || api.foste_apanhado), out.apanhado);
+    out.frase      = pick(fr.texto, fr.text, typeof api.frase_do_dia === 'string' ? api.frase_do_dia : undefined, out.frase);
+    out.fraseBy    = pick(fr.atribuicao, fr.by, out.fraseBy);
+    // Partes "visíveis" dos teasers (vêm para todos os utilizadores)
+    out.pessoaSign   = signIdFrom(pick(pe.signo, pe.sign, api.pessoa_a_observar_signo)) || out.pessoaSign;
+    out.quimicaScore = Number(pick(qu.nota, qu.score, out.quimicaScore));
+    out.alertaHora   = pick(al.hora, api.alerta_hora, out.alertaHora);
+    // Partes PRO (o backend só as envia a quem tem PRO)
+    if (isPro() && !ent.mock) {
+      out.pro = { pessoa: pick(pe.texto), quimica: pick(qu.texto), alerta: pick(al.texto), amanha: pick(am.texto) };
+    }
+    out.demo = !(api.estatistica && api.foste_apanhado && api.frase_do_dia && api.quimica && api.pessoa_a_observar);
+    return out;
+  }
+
+  /* ---------- Render ---------- */
+  let current = 'scorpio';
+  let data = null;
+  const $ = id => document.getElementById(id);
+  const FREE_BLOCKS = 5; // Drama, Amor, Estatística, Foste Apanhado/a, Frase do Dia
+
+  function buildPicker() {
+    $('picker').innerHTML = Object.keys(SIGNS).map(id => `
+      <button class="sp-btn" data-id="${id}" onclick="selectSign('${id}')" aria-pressed="false" aria-label="${SIGNS[id].n}">
+        ${iconHTML(id, 30)}<span class="sp-name">${SIGNS[id].n}</span>
+      </button>`).join('');
+  }
+  function markPicker() {
+    document.querySelectorAll('.sp-btn').forEach(b => {
+      const on = b.dataset.id === current;
+      b.classList.toggle('active', on); b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function quimicaTeaser(s) {
+    if (s >= 8) return { line: 'Sim. Nós também reparámos.', q: 'Porque está tão alta hoje?', hook: `${fmt(s)}/10 não apareceu aqui por acaso.` };
+    if (s >= 5) return { line: 'Há qualquer coisa no ar. E não é só o perfume.', q: 'De onde vem esta química?', hook: `${fmt(s)}/10. Há uma razão. Queres saber qual?` };
+    return { line: 'Baixa. Mas baixa não quer dizer zero.', q: 'Porque está tão baixa hoje?', hook: `${fmt(s)}/10. Os astros explicam. Com tato.` };
+  }
+
+  // Revelações PRO de hoje: só entram as que existem nos dados (contagem real).
+  function proItems(d) {
+    const items = [];
+    if (d.pessoaSign) items.push({ key: 'person_to_watch', el: 'tPessoa', label: `Porque deves estar atento/a a ${SIGNS[d.pessoaSign].n}`, short: 'Pessoa a observar' });
+    if (d.quimicaScore || d.quimicaScore === 0) items.push({ key: 'chemistry', el: 'tQuimica', label: 'Química completa', short: 'Química' });
+    if (d.alertaHora) items.push({ key: 'daily_alert', el: 'tAlerta', label: `O teu Alerta do Dia (${d.alertaHora})`, short: 'Alerta' });
+    if (d.hasAmanha) items.push({ key: 'tomorrow', el: 'tAmanha', label: 'Amanhã', short: 'Amanhã' });
+    return items;
+  }
+
+  function applyPlan() {
+    const pro = isPro();
+    document.querySelectorAll('[data-free-only]').forEach(el => el.hidden = pro);
+    document.querySelectorAll('[data-pro-only]').forEach(el => el.hidden = !pro);
+    const nav = $('navPro');
+    nav.classList.toggle('is-pro', pro);
+    nav.textContent = pro ? '✦ PRO' : 'PRO ✦';
+    nav.setAttribute('aria-label', pro ? 'Tens ASTRODRAMA PRO' : 'Conhecer o ASTRODRAMA PRO');
+    $('toastBtn').hidden = pro;
+    if (DEV) { $('devFree').classList.toggle('on', !pro); $('devPro').classList.toggle('on', pro); }
+  }
+
+  function render(d) {
+    data = d;
+    const s = SIGNS[current];
+    $('heroIcon').innerHTML = iconHTML(current, 76);
+    $('heroSign').textContent = s.n;
+    $('demoBadge').hidden = !d.demo;
+    $('dramaScore').textContent = fmt(d.dramaScore);
+    $('dramaBar').style.width = '0';
+    requestAnimationFrame(() => setTimeout(() => { $('dramaBar').style.width = Math.min(100, d.dramaScore * 10) + '%'; }, 60));
+    $('dramaTag').textContent = String(d.dramaTag).toUpperCase();
+    $('dramaText').textContent = d.dramaText;
+    $('amorScore').innerHTML = `${fmt(d.amorScore)}<small>/10</small>`;
+    $('amorText').textContent = d.amorText;
+    $('statVal').textContent = d.statVal;
+    $('statText').textContent = d.statText;
+    $('apanhadoText').textContent = d.apanhado;
+    $('fraseText').textContent = `«${String(d.frase).replace(/^[«"]|[»"]$/g, '')}»`;
+    $('fraseBy').textContent = d.fraseBy || '';
+
+    // Pessoa a observar: signo é grátis
+    $('tPessoa').hidden = !d.pessoaSign;
+    if (d.pessoaSign) {
+      const ps = SIGNS[d.pessoaSign];
+      $('pessoaIcon').innerHTML = iconHTML(d.pessoaSign, 44);
+      $('pessoaName').textContent = ps.n.toUpperCase();
+      $('pessoaQ').textContent = `Porque é que ${ps.n} apareceu aqui?`;
+    }
+    // Química: nota é grátis
+    const hasQ = d.quimicaScore || d.quimicaScore === 0;
+    $('tQuimica').hidden = !hasQ;
+    if (hasQ) {
+      const qt = quimicaTeaser(d.quimicaScore);
+      $('quimicaScore').innerHTML = `${fmt(d.quimicaScore)}<small>/10</small>`;
+      $('quimicaTeaser').textContent = qt.line;
+      $('quimicaQ').textContent = qt.q;
+    }
+    // Alerta: hora é grátis
+    $('tAlerta').hidden = !d.alertaHora;
+    $('alertaHora').textContent = `Depois das ${d.alertaHora}…`;
+    $('tAmanha').hidden = !d.hasAmanha;
+
+    // Textos PRO (só existem em data.pro quando há PRO)
+    const p = d.pro || {};
+    $('pessoaPro').textContent = p.pessoa || '';
+    $('quimicaPro').textContent = p.quimica || '';
+    $('alertaPro').textContent = p.alerta || '';
+    $('amanhaPro').textContent = p.amanha || '';
+
+    // Progresso honesto + CTA final
+    const items = proItems(d);
+    const total = FREE_BLOCKS + items.length;
+    $('dots').innerHTML = Array.from({ length: total }, (_, i) => `<span class="${i < FREE_BLOCKS ? 'on' : ''}"></span>`).join('');
+    $('finalCount').textContent = `Já viste ${FREE_BLOCKS} das ${total} revelações de hoje. Ainda tens ${items.length} por descobrir.`;
+    $('finalTitle').textContent = items.length === 1 ? 'Ainda te falta 1 revelação' : `Ainda te faltam ${items.length} revelações`;
+    $('finalList').innerHTML = items.map(i => `<li>${escapeHTML(i.short)}</li>`).join('');
+    $('finalCta').hidden = isPro() || items.length === 0;
+
+    // Canal de WhatsApp
+    $('chGlyph').textContent = s.g;
+    $('chSign').textContent = s.n;
+
+    applyPlan();
+    $('finalCta').hidden = isPro() || items.length === 0;
+    $('loading').hidden = true;
+    $('content').hidden = false;
+    document.title = `${s.n} · Boletim Astro Drama`;
+    observeTeasers();
+  }
+  const escapeHTML = str => String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  async function loadSign(id) {
+    current = id;
+    markPicker();
+    $('loading').hidden = false; $('content').hidden = true;
+    let api = null;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 6000);
+      // TODO: quando houver sessão, enviar o token para o backend decidir se devolve os textos PRO.
+      const r = await fetch(`${API}/api/horoscope/${id}`, { signal: ctrl.signal });
+      clearTimeout(t);
+      api = r.ok ? await r.json() : null;
+    } catch (_) {}
+    if (id !== current) return;
+    render(normalize(api, id));
+    track('boletim_view', { sign: id, demo: data.demo });
+  }
+
+  function selectSign(id) {
+    if (id === current && !$('content').hidden) return;
+    try { history.replaceState(null, '', `?sign=${id}`); } catch (_) {}
+    track('sign_switch', { sign: id });
+    loadSign(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ---------- Teasers: visto / clicado ---------- */
+  let seen = new Set(), io = null;
+  function observeTeasers() {
+    seen = new Set();
+    if (io) io.disconnect();
+    if (isPro() || !('IntersectionObserver' in window)) return;
+    io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const src = e.target.dataset.teaser;
+        if (e.isIntersecting && !seen.has(src)) {
+          seen.add(src);
+          track('premium_teaser_viewed', { source: src, sign: current });
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('[data-teaser]').forEach(el => { if (!el.hidden) io.observe(el); });
+  }
+
+  /* ---------- Paywall contextual ---------- */
+  let pwSource = null, lastFocus = null;
+  function hookFor(source) {
+    const d = data;
+    switch (source) {
+      case 'person_to_watch': return `Queres saber porque é que ${SIGNS[d.pessoaSign].n} apareceu no teu drama?`;
+      case 'chemistry':       return quimicaTeaser(d.quimicaScore).hook;
+      case 'daily_alert':     return `Queres mesmo saber o que acontece depois das ${d.alertaHora}?`;
+      case 'tomorrow':        return 'Espiar amanhã é feio. Mas nós deixamos.';
+      case 'after_share':     return 'Partilhaste o drama. Agora vê o resto.';
+      default:                return 'O resto do teu drama já está escrito.';
+    }
+  }
+  function onTeaserClick(source) {
+    if (isPro()) return;
+    track('premium_teaser_clicked', { source, sign: current });
+    openPaywall(source);
+  }
+  function openPaywall(source) {
+    if (!data) return;
+    pwSource = source;
+    lastFocus = document.activeElement;
+    $('pwHook').textContent = hookFor(source);
+    $('pwList').innerHTML = proItems(data).map(i => `<li class="${i.key === source ? 'hl' : ''}">${escapeHTML(i.label)}</li>`).join('');
+    $('pw').classList.add('open');
+    document.body.classList.add('modal-open');
+    setTimeout(() => $('pwCta').focus({ preventScroll: true }), 50);
+    track('paywall_viewed', { source, sign: current });
+  }
+  function closePaywall(how) {
+    if (!$('pw').classList.contains('open')) return;
+    $('pw').classList.remove('open');
+    document.body.classList.remove('modal-open');
+    track('paywall_closed', { source: pwSource, how, sign: current });
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePaywall('esc'); });
+
+  function startCheckout() {
+    track('checkout_started', { source: pwSource, plan: 'pro_monthly', sign: current });
+    // O checkout (Stripe) está na página inicial. subscription_started deve ser registado
+    // pelo backend quando o webhook do Stripe confirmar o pagamento.
+    navigate(pageURL('index', { pro: 'monthly', sign: current, source: pwSource || 'boletim' }));
+  }
+
+  /* ---------- Partilha (Web Share com alternativa de copiar) ---------- */
+  function shareText(block) {
+    const s = SIGNS[current].n, d = data;
+    switch (block) {
+      case 'drama':          return `${s} hoje: drama ${fmt(d.dramaScore)}/10. ${d.dramaTag}. ${d.dramaText}`;
+      case 'amor':           return `${s} · amor ${fmt(d.amorScore)}/10. ${d.amorText}`;
+      case 'estatistica':    return `${d.statVal} ${d.statText} (${s})`;
+      case 'foste_apanhado': return `Foste apanhado/a, ${s}: ${d.apanhado}`;
+      case 'frase_do_dia':   return `«${d.frase}» ${d.fraseBy || ''}`.trim();
+    }
+    return 'Astro Drama';
+  }
+  async function share(block) {
+    track('share_click', { block, sign: current });
+    const text = shareText(block) + ' — Astro Drama';
+    const url = PREVIEW ? undefined : location.origin + location.pathname + `?sign=${current}`;
+    let head = 'Partilhado.';
+    try {
+      if (navigator.share) { await navigator.share(url ? { text, url } : { text }); }
+      else if (navigator.clipboard) { await navigator.clipboard.writeText(url ? `${text} ${url}` : text); head = 'Copiado.'; }
+    } catch (_) { return; }
+    showToast(head);
+  }
+  let toastTimer;
+  function showToast(head) {
+    $('toastTxt').innerHTML = isPro()
+      ? `<strong>${head}</strong>Que o drama chegue a quem merece.`
+      : `<strong>${head}</strong>Já agora: ainda tens revelações por descobrir hoje.`;
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 7000);
+  }
+  function hideToast() { $('toast').classList.remove('show'); }
+
+  /* ---------- Pré-visualização: simular FREE / PRO (não existe no domínio público) ---------- */
+  function setDevPlan(plan) {
+    if (!DEV) return;
+    try { sessionStorage.setItem('ad_dev_plan', plan); } catch (_) {}
+    ent = { plan, mock: plan === 'pro' };
+    closePaywall('dev');
+    loadSign(current);
+  }
+
+  /* ---------- Arranque ---------- */
+  (async function init() {
+    const q = new URLSearchParams(location.search).get('sign');
+    current = SIGNS[q] ? q : 'scorpio';
+    $('navBack').href = PAGES.index; $('navLogo').href = PAGES.index;
+    if (PREVIEW) { $('navBack').target = '_top'; $('navLogo').target = '_top'; }
+    if (WHATSAPP_CHANNEL_URL && WHATSAPP_CHANNEL_URL !== '#') $('channelLink').href = WHATSAPP_CHANNEL_URL;
+    $('devbar').hidden = !DEV;
+    try {
+      $('heroDate').textContent = 'Boletim de ' + new Date().toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+    } catch (_) {}
+    ent = await loadEntitlement();
+    buildPicker();
+    loadSign(current);
+  })();
+</script>
+
+</html>
